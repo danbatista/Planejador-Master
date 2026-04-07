@@ -1,5 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
 import { formatDateTime } from "@/lib/format";
+import { getOrgContext } from "@/lib/org-context";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ProgressForm } from "./progress-form";
@@ -10,16 +10,48 @@ export default async function DogProfilePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("organization_id")
-    .eq("id", user!.id)
-    .single();
-  const orgId = profile!.organization_id!;
+  const ctx = await getOrgContext();
+
+  if (ctx.bypass) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <Link
+            href="/dashboard/clients"
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            ← Clients
+          </Link>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
+            Sample Dog
+          </h1>
+          <p className="mt-1 text-xs text-muted">Route id: {id} (preview only)</p>
+          <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-2">
+            <div>
+              <dt className="text-muted">Breed</dt>
+              <dd className="font-medium text-foreground">Labrador</dd>
+            </div>
+            <div>
+              <dt className="text-muted">Age</dt>
+              <dd className="font-medium text-foreground">18 months</dd>
+            </div>
+          </dl>
+        </div>
+        <div className="grid gap-8 lg:grid-cols-3">
+          <div className="space-y-4 lg:col-span-2">
+            <h2 className="text-sm font-semibold text-foreground">Progress timeline</h2>
+            <p className="rounded-xl border border-border bg-card p-6 text-sm text-muted">
+              No progress entries in preview.
+            </p>
+          </div>
+          <ProgressForm dogId={id} />
+        </div>
+      </div>
+    );
+  }
+
+  const supabase = ctx.supabase;
+  const orgId = ctx.orgId;
   const { data: dog } = await supabase
     .from("dogs")
     .select("*, clients(id, name)")

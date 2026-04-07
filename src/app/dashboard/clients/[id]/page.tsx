@@ -1,5 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
 import { formatDateTime, formatMoney } from "@/lib/format";
+import { getOrgContext } from "@/lib/org-context";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { NewDogForm } from "./new-dog-form";
@@ -10,16 +10,56 @@ export default async function ClientDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("organization_id")
-    .eq("id", user!.id)
-    .single();
-  const orgId = profile!.organization_id!;
+  const ctx = await getOrgContext();
+
+  if (ctx.bypass) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <Link
+            href="/dashboard/clients"
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            ← Clients
+          </Link>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
+            Sample Client
+          </h1>
+          <p className="mt-1 text-xs text-muted">Route id: {id} (preview only)</p>
+          <div className="mt-2 flex flex-wrap gap-4 text-sm text-muted">
+            <span>sample@example.com</span>
+            <span>+1 555 0100</span>
+          </div>
+        </div>
+        <div className="grid gap-8 lg:grid-cols-3">
+          <div className="space-y-6 lg:col-span-2">
+            <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
+              <h2 className="text-sm font-semibold text-foreground">Dogs</h2>
+              <p className="mt-4 text-sm text-muted">No dogs in preview.</p>
+            </section>
+            <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
+              <h2 className="text-sm font-semibold text-foreground">Service history</h2>
+              <p className="mt-4 text-sm text-muted">No sessions in preview.</p>
+            </section>
+            <div className="grid gap-6 sm:grid-cols-2">
+              <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
+                <h2 className="text-sm font-semibold text-foreground">Payments</h2>
+                <p className="mt-3 text-sm text-muted">None</p>
+              </section>
+              <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
+                <h2 className="text-sm font-semibold text-foreground">Invoices</h2>
+                <p className="mt-3 text-sm text-muted">None</p>
+              </section>
+            </div>
+          </div>
+          <NewDogForm clientId={id} />
+        </div>
+      </div>
+    );
+  }
+
+  const supabase = ctx.supabase;
+  const orgId = ctx.orgId;
   const { data: client } = await supabase
     .from("clients")
     .select("*")

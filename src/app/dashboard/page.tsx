@@ -1,19 +1,58 @@
-import { createClient } from "@/lib/supabase/server";
 import { formatDateTime, formatMoney } from "@/lib/format";
+import { getOrgContext } from "@/lib/org-context";
 import Link from "next/link";
 import { Calendar, Dog, DollarSign, Users } from "lucide-react";
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("organization_id")
-    .eq("id", user!.id)
-    .single();
-  const orgId = profile!.organization_id!;
+  const ctx = await getOrgContext();
+  if (ctx.bypass) {
+    const stats = [
+      { label: "Clients", value: 0, href: "/dashboard/clients", icon: Users },
+      { label: "Dogs", value: 0, href: "/dashboard/clients", icon: Dog },
+      { label: "Today's sessions", value: 0, href: "/dashboard/calendar", icon: Calendar },
+      { label: "Month revenue", value: formatMoney(0), href: "/dashboard/finance", icon: DollarSign },
+    ];
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Dashboard</h1>
+          <p className="mt-1 text-sm text-muted">Snapshot of your training business today.</p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {stats.map((s) => (
+            <Link
+              key={s.label}
+              href={s.href}
+              className="rounded-xl border border-border bg-card p-5 shadow-sm transition hover:border-primary/30"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-muted">{s.label}</span>
+                <s.icon className="h-4 w-4 text-primary" />
+              </div>
+              <p className="mt-3 text-2xl font-semibold tabular-nums text-foreground">{s.value}</p>
+            </Link>
+          ))}
+        </div>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+            <h2 className="text-sm font-semibold text-foreground">Upcoming sessions</h2>
+            <p className="mt-4 text-sm text-muted">No upcoming sessions.</p>
+          </div>
+          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+            <h2 className="text-sm font-semibold text-foreground">Alerts</h2>
+            <p className="mt-4 text-sm text-muted">0 pending or overdue payments</p>
+          </div>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+          <h2 className="text-sm font-semibold text-foreground">Recent activity</h2>
+          <p className="mt-4 text-sm text-muted">No activity yet.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const supabase = ctx.supabase;
+  const orgId = ctx.orgId;
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
   const endOfDay = new Date(startOfDay);
@@ -117,12 +156,8 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          Dashboard
-        </h1>
-        <p className="mt-1 text-sm text-muted">
-          Snapshot of your training business today.
-        </p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Dashboard</h1>
+        <p className="mt-1 text-sm text-muted">Snapshot of your training business today.</p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((s) => (
@@ -135,18 +170,14 @@ export default async function DashboardPage() {
               <span className="text-sm font-medium text-muted">{s.label}</span>
               <s.icon className="h-4 w-4 text-primary" />
             </div>
-            <p className="mt-3 text-2xl font-semibold tabular-nums text-foreground">
-              {s.value}
-            </p>
+            <p className="mt-3 text-2xl font-semibold tabular-nums text-foreground">{s.value}</p>
           </Link>
         ))}
       </div>
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-foreground">
-              Upcoming sessions
-            </h2>
+            <h2 className="text-sm font-semibold text-foreground">Upcoming sessions</h2>
             <Link
               href="/dashboard/calendar"
               className="text-xs font-medium text-primary hover:underline"
@@ -178,8 +209,7 @@ export default async function DashboardPage() {
                         `${r.dog?.name ?? "Dog"} · ${r.client?.name ?? "Client"}`}
                     </span>
                     <span className="text-xs text-muted">
-                      {formatDateTime(r.start_at)} ·{" "}
-                      {r.trainer?.full_name ?? "Trainer"}
+                      {formatDateTime(r.start_at)} · {r.trainer?.full_name ?? "Trainer"}
                     </span>
                   </li>
                 );
@@ -199,13 +229,13 @@ export default async function DashboardPage() {
           </div>
           <div className="mt-4 space-y-3 text-sm">
             <p className="rounded-lg bg-sidebar px-3 py-2 text-foreground">
-              <span className="font-medium">{pendingPayments.count ?? 0}</span>{" "}
-              pending or overdue payments
+              <span className="font-medium">{pendingPayments.count ?? 0}</span> pending or
+              overdue payments
             </p>
             <p className="text-muted">
               Enable email reminders in Supabase Auth and schedule{" "}
-              <code className="rounded bg-sidebar px-1 text-xs">/api/cron/reminders</code>{" "}
-              with your host.
+              <code className="rounded bg-sidebar px-1 text-xs">/api/cron/reminders</code> with
+              your host.
             </p>
           </div>
         </div>
@@ -218,9 +248,7 @@ export default async function DashboardPage() {
           ) : (
             (recentActivity.data ?? []).map((a) => (
               <li key={a.id} className="flex flex-wrap items-baseline gap-2 py-3">
-                <span className="text-sm font-medium text-foreground">
-                  {a.action}
-                </span>
+                <span className="text-sm font-medium text-foreground">{a.action}</span>
                 {a.entity_type ? (
                   <span className="text-xs text-muted">{a.entity_type}</span>
                 ) : null}

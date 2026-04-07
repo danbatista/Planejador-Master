@@ -1,8 +1,10 @@
-import { redirect } from "next/navigation";
+import { isAuthBypass } from "@/lib/auth-bypass";
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 import { OnboardingForm } from "./onboarding-form";
 
 export default async function OnboardingPage() {
+  if (isAuthBypass()) redirect("/dashboard");
   const supabase = await createClient();
   const {
     data: { user },

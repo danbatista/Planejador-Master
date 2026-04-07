@@ -1,24 +1,27 @@
-import { createClient } from "@/lib/supabase/server";
 import { formatDateTime } from "@/lib/format";
+import { getOrgContext } from "@/lib/org-context";
 
 export default async function NotificationsPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("organization_id")
-    .eq("id", user!.id)
-    .single();
-  const orgId = profile!.organization_id!;
-  const { data: items } = await supabase
-    .from("notifications")
-    .select("*")
-    .eq("organization_id", orgId)
-    .or(`user_id.eq.${user!.id},user_id.is.null`)
-    .order("created_at", { ascending: false })
-    .limit(50);
+  const ctx = await getOrgContext();
+  let items: {
+    id: string;
+    title: string;
+    body: string | null;
+    channel: string;
+    type: string;
+    created_at: string;
+  }[] = [];
+
+  if (!ctx.bypass) {
+    const { data } = await ctx.supabase
+      .from("notifications")
+      .select("*")
+      .eq("organization_id", ctx.orgId)
+      .or(`user_id.eq.${ctx.profile.id},user_id.is.null`)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    items = (data ?? []) as typeof items;
+  }
 
   return (
     <div className="space-y-6">
@@ -31,12 +34,14 @@ export default async function NotificationsPage() {
         </p>
       </div>
       <ul className="space-y-2">
-        {(items ?? []).length === 0 ? (
+        {items.length === 0 ? (
           <li className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted">
-            No notifications yet. Cron reminders will enqueue rows here.
+            {ctx.bypass
+              ? "Preview mode: no notifications."
+              : "No notifications yet. Cron reminders will enqueue rows here."}
           </li>
         ) : (
-          (items ?? []).map((n) => (
+          items.map((n) => (
             <li
               key={n.id}
               className="rounded-xl border border-border bg-card p-4 shadow-sm"

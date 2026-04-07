@@ -1,26 +1,32 @@
-import { createClient } from "@/lib/supabase/server";
 import { formatMoney } from "@/lib/format";
+import { getOrgContext } from "@/lib/org-context";
 import { NewExpenseForm } from "./new-expense-form";
 import { RevenueByMethodChart } from "./revenue-by-method-chart";
 import { NewInvoiceForm } from "./new-invoice-form";
 import { NewPaymentForm } from "./new-payment-form";
 
 export default async function FinancePage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("organization_id")
-    .eq("id", user!.id)
-    .single();
-  const orgId = profile!.organization_id!;
+  const ctx = await getOrgContext();
   const monthStart = new Date();
   monthStart.setDate(1);
   monthStart.setHours(0, 0, 0, 0);
-  const [{ data: payments }, { data: expenses }, { data: clients }] =
-    await Promise.all([
+
+  let payments: {
+    id: string;
+    amount_cents: number;
+    method: string;
+    status: string;
+    paid_at: string | null;
+    clients?: { name: string } | null;
+  }[] = [];
+  let expenses: { id: string; category: string; amount_cents: number; incurred_at: string }[] =
+    [];
+  let clients: { id: string; name: string }[] = [];
+
+  if (!ctx.bypass) {
+    const supabase = ctx.supabase;
+    const orgId = ctx.orgId;
+    const [pa, ex, cl] = await Promise.all([
       supabase
         .from("payments")
         .select("id, amount_cents, method, status, paid_at, client_id, clients(name)")
@@ -35,12 +41,21 @@ export default async function FinancePage() {
         .limit(50),
       supabase.from("clients").select("id, name").eq("organization_id", orgId).order("name"),
     ]);
+    payments = (pa.data ?? []) as unknown as typeof payments;
+    expenses = (ex.data ?? []) as {
+      id: string;
+      category: string;
+      amount_cents: number;
+      incurred_at: string;
+    }[];
+    clients = cl.data ?? [];
+  }
 
-  const paidPayments = (payments ?? []).filter((p) => p.status === "paid");
+  const paidPayments = payments.filter((p) => p.status === "paid");
   const revenueMonth = paidPayments
     .filter((p) => p.paid_at && new Date(p.paid_at) >= monthStart)
     .reduce((s, p) => s + p.amount_cents, 0);
-  const expenseMonth = (expenses ?? [])
+  const expenseMonth = expenses
     .filter((e) => new Date(e.incurred_at) >= monthStart)
     .reduce((s, e) => s + e.amount_cents, 0);
   const profitMonth = revenueMonth - expenseMonth;
@@ -56,16 +71,14 @@ export default async function FinancePage() {
     revenue: cents / 100,
   }));
 
-  const pendingDebt = (payments ?? [])
+  const pendingDebt = payments
     .filter((p) => p.status === "pending" || p.status === "overdue")
     .reduce((s, p) => s + p.amount_cents, 0);
 
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          Finance
-        </h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Finance</h1>
         <p className="mt-1 text-sm text-muted">
           Revenue, expenses, invoices, and payment methods including Pix.
         </p>
@@ -106,19 +119,31 @@ export default async function FinancePage() {
           </div>
         </div>
         <div className="space-y-6">
-          <NewPaymentForm clients={clients ?? []} />
+          <NewPaymentForm
+            clients={
+              ctx.bypass && clients.length === 0
+                ? [{ id: "preview-client", name: "Preview client" }]
+                : clients
+            }
+          />
           <NewExpenseForm />
-          <NewInvoiceForm clients={clients ?? []} />
+          <NewInvoiceForm
+            clients={
+              ctx.bypass && clients.length === 0
+                ? [{ id: "preview-client", name: "Preview client" }]
+                : clients
+            }
+          />
         </div>
       </div>
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
           <h2 className="text-sm font-semibold text-foreground">Recent payments</h2>
           <ul className="mt-3 space-y-2 text-sm">
-            {(payments ?? []).length === 0 ? (
-              <li className="text-muted">None</li>
+            {payments.length === 0 ? (
+              <li className="text-muted">{ctx.bypass ? "Preview mode." : "None"}</li>
             ) : (
-              (payments ?? []).map((p) => {
+              payments.map((p) => {
                 const row = p as typeof p & {
                   clients: { name: string } | null;
                 };
@@ -139,10 +164,10 @@ export default async function FinancePage() {
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
           <h2 className="text-sm font-semibold text-foreground">Recent expenses</h2>
           <ul className="mt-3 space-y-2 text-sm">
-            {(expenses ?? []).length === 0 ? (
-              <li className="text-muted">None</li>
+            {expenses.length === 0 ? (
+              <li className="text-muted">{ctx.bypass ? "Preview mode." : "None"}</li>
             ) : (
-              (expenses ?? []).map((ex) => (
+              expenses.map((ex) => (
                 <li key={ex.id} className="flex justify-between gap-2 border-b border-border pb-2">
                   <span className="text-muted">{ex.category}</span>
                   <span className="font-medium tabular-nums">

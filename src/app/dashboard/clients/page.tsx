@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { getOrgContext } from "@/lib/org-context";
 import Link from "next/link";
 import { ClientSearch } from "./client-search";
 import { NewClientForm } from "./new-client-form";
@@ -9,39 +9,32 @@ export default async function ClientsPage({
   searchParams: Promise<{ q?: string }>;
 }) {
   const { q } = await searchParams;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("organization_id")
-    .eq("id", user!.id)
-    .single();
-  const orgId = profile!.organization_id!;
-  let query = supabase
-    .from("clients")
-    .select("id, name, email, phone, created_at")
-    .eq("organization_id", orgId)
-    .order("name", { ascending: true });
+  const ctx = await getOrgContext();
   const term = q?.trim();
-  if (term) {
-    query = query.or(
-      `name.ilike.%${term}%,email.ilike.%${term}%,phone.ilike.%${term}%`,
-    );
+  let clients: { id: string; name: string; email: string | null; phone: string | null }[] =
+    [];
+
+  if (!ctx.bypass) {
+    let query = ctx.supabase
+      .from("clients")
+      .select("id, name, email, phone, created_at")
+      .eq("organization_id", ctx.orgId)
+      .order("name", { ascending: true });
+    if (term) {
+      query = query.or(
+        `name.ilike.%${term}%,email.ilike.%${term}%,phone.ilike.%${term}%`,
+      );
+    }
+    const { data } = await query;
+    clients = data ?? [];
   }
-  const { data: clients } = await query;
 
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            Clients
-          </h1>
-          <p className="mt-1 text-sm text-muted">
-            CRM for owners and their dogs.
-          </p>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Clients</h1>
+          <p className="mt-1 text-sm text-muted">CRM for owners and their dogs.</p>
         </div>
         <ClientSearch initial={term ?? ""} />
       </div>
@@ -57,14 +50,16 @@ export default async function ClientsPage({
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {(clients ?? []).length === 0 ? (
+                {clients.length === 0 ? (
                   <tr>
                     <td colSpan={3} className="px-4 py-8 text-center text-muted">
-                      No clients yet. Add your first on the right.
+                      {ctx.bypass
+                        ? "Preview mode: no data. Forms are disabled."
+                        : "No clients yet. Add your first on the right."}
                     </td>
                   </tr>
                 ) : (
-                  (clients ?? []).map((c) => (
+                  clients.map((c) => (
                     <tr key={c.id} className="hover:bg-sidebar/50">
                       <td className="px-4 py-3 font-medium text-foreground">
                         <Link

@@ -1,5 +1,6 @@
 "use client";
 
+import { usePreviewMode } from "@/components/preview-mode";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -9,6 +10,7 @@ export function NewInvoiceForm({
 }: {
   clients: { id: string; name: string }[];
 }) {
+  const preview = usePreviewMode();
   const router = useRouter();
   const supabase = createClient();
   const [clientId, setClientId] = useState(clients[0]?.id ?? "");
@@ -20,6 +22,10 @@ export function NewInvoiceForm({
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (preview) {
+      setError("Preview mode: connect Supabase and set NEXT_PUBLIC_AUTH_BYPASS=0 to save.");
+      return;
+    }
     setError(null);
     setLoading(true);
     const {
@@ -106,10 +112,10 @@ export function NewInvoiceForm({
         ) : null}
         <button
           type="submit"
-          disabled={loading || clients.length === 0}
+          disabled={loading || preview || clients.length === 0}
           className="w-full rounded-lg bg-accent py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 dark:text-slate-900"
         >
-          {loading ? "Saving…" : "Create invoice"}
+          {preview ? "Preview — disabled" : loading ? "Saving…" : "Create invoice"}
         </button>
       </form>
     </div>

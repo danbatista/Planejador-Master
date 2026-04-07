@@ -1,3 +1,4 @@
+import { isAuthBypass } from "@/lib/auth-bypass";
 import { createClient } from "@/lib/supabase/server";
 import { DogReportDocument } from "@/lib/reports/dog-report-document";
 import { renderToBuffer } from "@react-pdf/renderer";
@@ -11,6 +12,27 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
+  if (isAuthBypass()) {
+    const buffer = await renderToBuffer(
+      createElement(DogReportDocument, {
+        dog: {
+          name: "Preview Dog",
+          breed: "Sample breed",
+          age_months: 12,
+          training_goals: "Leash manners",
+          behavioral_problems: "Jumping",
+        },
+        client: { name: "Preview Client", email: "client@example.com", phone: null },
+        progress: [],
+      }) as Parameters<typeof renderToBuffer>[0],
+    );
+    return new NextResponse(new Uint8Array(buffer), {
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": 'attachment; filename="dog-report-preview.pdf"',
+      },
+    });
+  }
   const supabase = await createClient();
   const {
     data: { user },

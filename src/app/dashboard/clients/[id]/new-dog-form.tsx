@@ -1,10 +1,12 @@
 "use client";
 
+import { usePreviewMode } from "@/components/preview-mode";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export function NewDogForm({ clientId }: { clientId: string }) {
+  const preview = usePreviewMode();
   const router = useRouter();
   const supabase = createClient();
   const [name, setName] = useState("");
@@ -20,6 +22,10 @@ export function NewDogForm({ clientId }: { clientId: string }) {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (preview) {
+      setError("Preview mode: connect Supabase and set NEXT_PUBLIC_AUTH_BYPASS=0 to save.");
+      return;
+    }
     setError(null);
     setLoading(true);
     const {
@@ -148,10 +154,10 @@ export function NewDogForm({ clientId }: { clientId: string }) {
         ) : null}
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || preview}
           className="w-full rounded-lg bg-accent py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 dark:text-slate-900"
         >
-          {loading ? "Saving…" : "Save dog"}
+          {preview ? "Preview — disabled" : loading ? "Saving…" : "Save dog"}
         </button>
       </form>
     </div>

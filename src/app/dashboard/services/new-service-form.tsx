@@ -1,5 +1,6 @@
 "use client";
 
+import { usePreviewMode } from "@/components/preview-mode";
 import { createClient } from "@/lib/supabase/client";
 import type { ServiceKind } from "@/types/database";
 import { useRouter } from "next/navigation";
@@ -15,6 +16,7 @@ const KINDS: { value: ServiceKind; label: string }[] = [
 ];
 
 export function NewServiceForm() {
+  const preview = usePreviewMode();
   const router = useRouter();
   const supabase = createClient();
   const [name, setName] = useState("");
@@ -27,6 +29,10 @@ export function NewServiceForm() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (preview) {
+      setError("Preview mode: connect Supabase and set NEXT_PUBLIC_AUTH_BYPASS=0 to save.");
+      return;
+    }
     setError(null);
     setLoading(true);
     const {
@@ -121,10 +127,10 @@ export function NewServiceForm() {
         ) : null}
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || preview}
           className="w-full rounded-lg bg-primary py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60"
         >
-          {loading ? "Saving…" : "Add service"}
+          {preview ? "Preview — disabled" : loading ? "Saving…" : "Add service"}
         </button>
       </form>
     </div>

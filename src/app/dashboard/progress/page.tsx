@@ -1,22 +1,19 @@
-import { createClient } from "@/lib/supabase/server";
+import { getOrgContext } from "@/lib/org-context";
 import Link from "next/link";
 
 export default async function ProgressHubPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("organization_id")
-    .eq("id", user!.id)
-    .single();
-  const orgId = profile!.organization_id!;
-  const { data: dogs } = await supabase
-    .from("dogs")
-    .select("id, name, breed, clients(name)")
-    .eq("organization_id", orgId)
-    .order("name");
+  const ctx = await getOrgContext();
+  let dogs: { id: string; name: string; breed: string | null; clients: { name: string } | null }[] =
+    [];
+
+  if (!ctx.bypass) {
+    const { data } = await ctx.supabase
+      .from("dogs")
+      .select("id, name, breed, clients(name)")
+      .eq("organization_id", ctx.orgId)
+      .order("name");
+    dogs = (data ?? []) as unknown as typeof dogs;
+  }
 
   return (
     <div className="space-y-6">
@@ -29,28 +26,27 @@ export default async function ProgressHubPage() {
         </p>
       </div>
       <ul className="grid gap-3 sm:grid-cols-2">
-        {(dogs ?? []).length === 0 ? (
+        {dogs.length === 0 ? (
           <li className="rounded-xl border border-border bg-card p-6 text-sm text-muted">
-            Add dogs from a client profile first.
+            {ctx.bypass
+              ? "Preview mode: add dogs when using Supabase."
+              : "Add dogs from a client profile first."}
           </li>
         ) : (
-          (dogs ?? []).map((d) => {
-            const row = d as typeof d & { clients: { name: string } | null };
-            return (
-              <li key={d.id}>
-                <Link
-                  href={`/dashboard/dogs/${d.id}`}
-                  className="block rounded-xl border border-border bg-card p-4 shadow-sm transition hover:border-primary/40"
-                >
-                  <p className="font-medium text-foreground">{d.name}</p>
-                  <p className="text-xs text-muted">
-                    {row.clients?.name}
-                    {d.breed ? ` · ${d.breed}` : ""}
-                  </p>
-                </Link>
-              </li>
-            );
-          })
+          dogs.map((d) => (
+            <li key={d.id}>
+              <Link
+                href={`/dashboard/dogs/${d.id}`}
+                className="block rounded-xl border border-border bg-card p-4 shadow-sm transition hover:border-primary/40"
+              >
+                <p className="font-medium text-foreground">{d.name}</p>
+                <p className="text-xs text-muted">
+                  {d.clients?.name}
+                  {d.breed ? ` · ${d.breed}` : ""}
+                </p>
+              </Link>
+            </li>
+          ))
         )}
       </ul>
     </div>

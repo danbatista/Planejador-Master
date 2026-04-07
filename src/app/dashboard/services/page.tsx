@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { getOrgContext } from "@/lib/org-context";
 import { NewPackageForm } from "./new-package-form";
 import { NewServiceForm } from "./new-service-form";
 
@@ -12,28 +12,33 @@ const KIND_LABELS: Record<string, string> = {
 };
 
 export default async function ServicesPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("organization_id")
-    .eq("id", user!.id)
-    .single();
-  const orgId = profile!.organization_id!;
-  const [{ data: services }, { data: packages }] = await Promise.all([
-    supabase
-      .from("services")
-      .select("*")
-      .eq("organization_id", orgId)
-      .order("name"),
-    supabase
-      .from("packages")
-      .select("*")
-      .eq("organization_id", orgId)
-      .order("name"),
-  ]);
+  const ctx = await getOrgContext();
+  let services: {
+    id: string;
+    name: string;
+    kind: string;
+    description: string | null;
+    duration_minutes: number;
+    active: boolean;
+  }[] = [];
+  let packages: {
+    id: string;
+    name: string;
+    description: string | null;
+    sessions_included: number;
+    validity_days: number | null;
+  }[] = [];
+
+  if (!ctx.bypass) {
+    const supabase = ctx.supabase;
+    const orgId = ctx.orgId;
+    const [{ data: s }, { data: p }] = await Promise.all([
+      supabase.from("services").select("*").eq("organization_id", orgId).order("name"),
+      supabase.from("packages").select("*").eq("organization_id", orgId).order("name"),
+    ]);
+    services = (s ?? []) as typeof services;
+    packages = (p ?? []) as typeof packages;
+  }
 
   return (
     <div className="space-y-10">
@@ -41,18 +46,18 @@ export default async function ServicesPage() {
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">
           Services & packages
         </h1>
-        <p className="mt-1 text-sm text-muted">
-          Catalog for lessons, boarding, and bundles.
-        </p>
+        <p className="mt-1 text-sm text-muted">Catalog for lessons, boarding, and bundles.</p>
       </div>
       <div className="grid gap-8 lg:grid-cols-2">
         <div>
           <h2 className="text-sm font-semibold text-foreground">Services</h2>
           <div className="mt-3 space-y-2">
-            {(services ?? []).length === 0 ? (
-              <p className="text-sm text-muted">No services yet.</p>
+            {services.length === 0 ? (
+              <p className="text-sm text-muted">
+                {ctx.bypass ? "Preview mode: no services." : "No services yet."}
+              </p>
             ) : (
-              (services ?? []).map((s) => (
+              services.map((s) => (
                 <div
                   key={s.id}
                   className="rounded-xl border border-border bg-card p-4 shadow-sm"
@@ -88,10 +93,12 @@ export default async function ServicesPage() {
         <div>
           <h2 className="text-sm font-semibold text-foreground">Packages</h2>
           <div className="mt-3 space-y-2">
-            {(packages ?? []).length === 0 ? (
-              <p className="text-sm text-muted">No packages yet.</p>
+            {packages.length === 0 ? (
+              <p className="text-sm text-muted">
+                {ctx.bypass ? "Preview mode: no packages." : "No packages yet."}
+              </p>
             ) : (
-              (packages ?? []).map((p) => (
+              packages.map((p) => (
                 <div
                   key={p.id}
                   className="rounded-xl border border-border bg-card p-4 shadow-sm"

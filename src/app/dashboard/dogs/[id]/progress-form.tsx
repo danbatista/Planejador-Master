@@ -1,10 +1,12 @@
 "use client";
 
+import { usePreviewMode } from "@/components/preview-mode";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export function ProgressForm({ dogId }: { dogId: string }) {
+  const preview = usePreviewMode();
   const router = useRouter();
   const supabase = createClient();
   const [title, setTitle] = useState("");
@@ -19,6 +21,10 @@ export function ProgressForm({ dogId }: { dogId: string }) {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (preview) {
+      setError("Preview mode: connect Supabase and set NEXT_PUBLIC_AUTH_BYPASS=0 to save.");
+      return;
+    }
     setError(null);
     setLoading(true);
     const {
@@ -132,10 +138,10 @@ export function ProgressForm({ dogId }: { dogId: string }) {
         ) : null}
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || preview}
           className="w-full rounded-lg bg-primary py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60"
         >
-          {loading ? "Saving…" : "Save entry"}
+          {preview ? "Preview — disabled" : loading ? "Saving…" : "Save entry"}
         </button>
       </form>
     </div>

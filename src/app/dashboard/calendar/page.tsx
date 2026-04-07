@@ -1,5 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
 import { formatDateTime } from "@/lib/format";
+import { getOrgContext } from "@/lib/org-context";
 import {
   NewSessionForm,
   type DogRow,
@@ -13,24 +13,24 @@ export default async function CalendarPage({
   searchParams: Promise<{ from?: string }>;
 }) {
   const { from } = await searchParams;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("organization_id, role")
-    .eq("id", user!.id)
-    .single();
-  const orgId = profile!.organization_id!;
+  const ctx = await getOrgContext();
   const start = from ? new Date(from) : new Date();
   start.setHours(0, 0, 0, 0);
   const end = new Date(start);
   end.setDate(end.getDate() + 7);
-  const { data: sessions } = await supabase
-    .from("training_sessions")
-    .select(
-      `
+
+  let sessions: unknown[] = [];
+  let dogs: DogRow[] = [];
+  let trainers: TrainerRow[] = [];
+  let services: ServiceRow[] = [];
+
+  if (!ctx.bypass) {
+    const supabase = ctx.supabase;
+    const orgId = ctx.orgId;
+    const { data: s } = await supabase
+      .from("training_sessions")
+      .select(
+        `
       id,
       start_at,
       end_at,
@@ -42,48 +42,51 @@ export default async function CalendarPage({
       trainer:profiles!training_sessions_trainer_id_fkey (full_name),
       service:services (name)
     `,
-    )
-    .eq("organization_id", orgId)
-    .gte("start_at", start.toISOString())
-    .lt("start_at", end.toISOString())
-    .order("start_at", { ascending: true });
-  const [{ data: dogs }, { data: trainers }, { data: services }] = await Promise.all([
-    supabase
-      .from("dogs")
-      .select("id, name, client_id, clients(name)")
+      )
       .eq("organization_id", orgId)
-      .order("name"),
-    supabase
-      .from("profiles")
-      .select("id, full_name, role")
-      .eq("organization_id", orgId)
-      .order("full_name"),
-    supabase
-      .from("services")
-      .select("id, name, duration_minutes")
-      .eq("organization_id", orgId)
-      .eq("active", true)
-      .order("name"),
-  ]);
+      .gte("start_at", start.toISOString())
+      .lt("start_at", end.toISOString())
+      .order("start_at", { ascending: true });
+    sessions = s ?? [];
+    const [{ data: d }, { data: t }, { data: sv }] = await Promise.all([
+      supabase
+        .from("dogs")
+        .select("id, name, client_id, clients(name)")
+        .eq("organization_id", orgId)
+        .order("name"),
+      supabase
+        .from("profiles")
+        .select("id, full_name, role")
+        .eq("organization_id", orgId)
+        .order("full_name"),
+      supabase
+        .from("services")
+        .select("id, name, duration_minutes")
+        .eq("organization_id", orgId)
+        .eq("active", true)
+        .order("name"),
+    ]);
+    dogs = (d ?? []) as unknown as DogRow[];
+    trainers = (t ?? []) as unknown as TrainerRow[];
+    services = (sv ?? []) as unknown as ServiceRow[];
+  }
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          Calendar
-        </h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Calendar</h1>
         <p className="mt-1 text-sm text-muted">
           Week view with conflict-safe scheduling (trainer and dog).
         </p>
       </div>
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="space-y-3 lg:col-span-2">
-          {(sessions ?? []).length === 0 ? (
+          {sessions.length === 0 ? (
             <p className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted">
-              No sessions this week.
+              {ctx.bypass ? "Preview mode: no sessions." : "No sessions this week."}
             </p>
           ) : (
-            (sessions ?? []).map((row) => {
+            sessions.map((row) => {
               const s = row as unknown as {
                 id: string;
                 start_at: string;
@@ -125,11 +128,11 @@ export default async function CalendarPage({
           )}
         </div>
         <NewSessionForm
-          dogs={(dogs ?? []) as unknown as DogRow[]}
-          trainers={(trainers ?? []) as unknown as TrainerRow[]}
-          services={(services ?? []) as unknown as ServiceRow[]}
-          currentUserId={user!.id}
-          role={profile!.role}
+          dogs={dogs}
+          trainers={trainers}
+          services={services}
+          currentUserId={ctx.profile.id}
+          role={ctx.profile.role}
         />
       </div>
     </div>

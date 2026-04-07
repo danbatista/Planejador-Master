@@ -1,10 +1,12 @@
 "use client";
 
+import { usePreviewMode } from "@/components/preview-mode";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export function NewExpenseForm() {
+  const preview = usePreviewMode();
   const router = useRouter();
   const supabase = createClient();
   const [category, setCategory] = useState("");
@@ -18,6 +20,10 @@ export function NewExpenseForm() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (preview) {
+      setError("Preview mode: connect Supabase and set NEXT_PUBLIC_AUTH_BYPASS=0 to save.");
+      return;
+    }
     setError(null);
     setLoading(true);
     const {
@@ -96,10 +102,10 @@ export function NewExpenseForm() {
         ) : null}
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || preview}
           className="w-full rounded-lg border border-border py-2 text-sm font-semibold hover:bg-sidebar disabled:opacity-60"
         >
-          {loading ? "Saving…" : "Save expense"}
+          {preview ? "Preview — disabled" : loading ? "Saving…" : "Save expense"}
         </button>
       </form>
     </div>

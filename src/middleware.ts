@@ -1,9 +1,13 @@
 import { createServerClient } from "@supabase/ssr";
+import { isAuthBypass } from "@/lib/auth-bypass";
 import { getSupabaseAnonKey, getSupabaseUrl } from "@/lib/supabase/env";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
+  if (isAuthBypass()) {
+    return response;
+  }
   const supabaseUrl = getSupabaseUrl();
   const supabaseKey = getSupabaseAnonKey();
   const configured =

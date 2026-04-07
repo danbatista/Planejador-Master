@@ -1,5 +1,6 @@
 "use client";
 
+import { usePreviewMode } from "@/components/preview-mode";
 import { createClient } from "@/lib/supabase/client";
 import { canAssignAnyTrainer } from "@/lib/permissions";
 import type { UserRole } from "@/types/database";
@@ -28,6 +29,7 @@ export function NewSessionForm({
   currentUserId: string;
   role: UserRole;
 }) {
+  const preview = usePreviewMode();
   const router = useRouter();
   const supabase = createClient();
   const [dogId, setDogId] = useState(dogs[0]?.id ?? "");
@@ -51,6 +53,10 @@ export function NewSessionForm({
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (preview) {
+      setError("Preview mode: connect Supabase and set NEXT_PUBLIC_AUTH_BYPASS=0 to save.");
+      return;
+    }
     setError(null);
     if (!dogId || !clientId) {
       setError("Select a dog");
@@ -198,10 +204,10 @@ export function NewSessionForm({
         ) : null}
         <button
           type="submit"
-          disabled={loading || dogs.length === 0}
+          disabled={loading || preview || dogs.length === 0}
           className="w-full rounded-lg bg-primary py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60"
         >
-          {loading ? "Scheduling…" : "Schedule"}
+          {preview ? "Preview — disabled" : loading ? "Scheduling…" : "Schedule"}
         </button>
       </form>
     </div>

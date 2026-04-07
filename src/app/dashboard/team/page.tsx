@@ -1,30 +1,40 @@
-import { createClient } from "@/lib/supabase/server";
 import { canManageTeam } from "@/lib/permissions";
+import { getOrgContext } from "@/lib/org-context";
 import { RoleSelect } from "./role-select";
 
 export default async function TeamPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: me } = await supabase
-    .from("profiles")
-    .select("organization_id, role")
-    .eq("id", user!.id)
-    .single();
-  const orgId = me!.organization_id!;
-  const { data: members } = await supabase
-    .from("profiles")
-    .select("id, full_name, email, role, created_at")
-    .eq("organization_id", orgId)
-    .order("created_at", { ascending: true });
+  const ctx = await getOrgContext();
+  let members: {
+    id: string;
+    full_name: string | null;
+    email: string | null;
+    role: string;
+    created_at: string;
+  }[] = [];
+
+  if (!ctx.bypass) {
+    const { data } = await ctx.supabase
+      .from("profiles")
+      .select("id, full_name, email, role, created_at")
+      .eq("organization_id", ctx.orgId)
+      .order("created_at", { ascending: true });
+    members = (data ?? []) as typeof members;
+  } else {
+    members = [
+      {
+        id: ctx.profile.id,
+        full_name: ctx.profile.full_name,
+        email: ctx.profile.email,
+        role: ctx.profile.role,
+        created_at: ctx.profile.created_at,
+      },
+    ];
+  }
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          Team
-        </h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Team</h1>
         <p className="mt-1 text-sm text-muted">
           Admin, trainer, and assistant roles with session and finance permissions.
         </p>
@@ -38,19 +48,19 @@ export default async function TeamPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {(members ?? []).map((m) => (
+            {members.map((m) => (
               <tr key={m.id}>
                 <td className="px-4 py-3">
                   <p className="font-medium text-foreground">
                     {m.full_name || m.email || m.id.slice(0, 8)}
                   </p>
-                  {m.email ? (
-                    <p className="text-xs text-muted">{m.email}</p>
-                  ) : null}
+                  {m.email ? <p className="text-xs text-muted">{m.email}</p> : null}
                 </td>
                 <td className="px-4 py-3">
-                  {canManageTeam(me!.role) && m.id !== user!.id ? (
-                    <RoleSelect memberId={m.id} currentRole={m.role} />
+                  {ctx.bypass ? (
+                    <span className="capitalize text-muted">{m.role}</span>
+                  ) : canManageTeam(ctx.profile.role) && m.id !== ctx.profile.id ? (
+                    <RoleSelect memberId={m.id} currentRole={m.role as "admin" | "trainer" | "assistant"} />
                   ) : (
                     <span className="capitalize text-muted">{m.role}</span>
                   )}
@@ -62,10 +72,9 @@ export default async function TeamPage() {
       </div>
       <p className="text-sm text-muted">
         Invite teammates from Supabase Auth (email invite) or add an API route using{" "}
-        <code className="rounded bg-sidebar px-1 text-xs">inviteUserByEmail</code> with
-        the service role, then attach{" "}
-        <code className="rounded bg-sidebar px-1 text-xs">organization_id</code> on first
-        login.
+        <code className="rounded bg-sidebar px-1 text-xs">inviteUserByEmail</code> with the
+        service role, then attach{" "}
+        <code className="rounded bg-sidebar px-1 text-xs">organization_id</code> on first login.
       </p>
     </div>
   );
