@@ -1,0 +1,159 @@
+import { createClient } from "@/lib/supabase/server";
+import { formatMoney } from "@/lib/format";
+import { NewExpenseForm } from "./new-expense-form";
+import { RevenueByMethodChart } from "./revenue-by-method-chart";
+import { NewInvoiceForm } from "./new-invoice-form";
+import { NewPaymentForm } from "./new-payment-form";
+
+export default async function FinancePage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("organization_id")
+    .eq("id", user!.id)
+    .single();
+  const orgId = profile!.organization_id!;
+  const monthStart = new Date();
+  monthStart.setDate(1);
+  monthStart.setHours(0, 0, 0, 0);
+  const [{ data: payments }, { data: expenses }, { data: clients }] =
+    await Promise.all([
+      supabase
+        .from("payments")
+        .select("id, amount_cents, method, status, paid_at, client_id, clients(name)")
+        .eq("organization_id", orgId)
+        .order("created_at", { ascending: false })
+        .limit(50),
+      supabase
+        .from("expenses")
+        .select("*")
+        .eq("organization_id", orgId)
+        .order("incurred_at", { ascending: false })
+        .limit(50),
+      supabase.from("clients").select("id, name").eq("organization_id", orgId).order("name"),
+    ]);
+
+  const paidPayments = (payments ?? []).filter((p) => p.status === "paid");
+  const revenueMonth = paidPayments
+    .filter((p) => p.paid_at && new Date(p.paid_at) >= monthStart)
+    .reduce((s, p) => s + p.amount_cents, 0);
+  const expenseMonth = (expenses ?? [])
+    .filter((e) => new Date(e.incurred_at) >= monthStart)
+    .reduce((s, e) => s + e.amount_cents, 0);
+  const profitMonth = revenueMonth - expenseMonth;
+
+  const byMethod: Record<string, number> = {};
+  for (const p of paidPayments) {
+    if (p.paid_at && new Date(p.paid_at) >= monthStart) {
+      byMethod[p.method] = (byMethod[p.method] ?? 0) + p.amount_cents;
+    }
+  }
+  const chartData = Object.entries(byMethod).map(([method, cents]) => ({
+    method: method.replace("_", " "),
+    revenue: cents / 100,
+  }));
+
+  const pendingDebt = (payments ?? [])
+    .filter((p) => p.status === "pending" || p.status === "overdue")
+    .reduce((s, p) => s + p.amount_cents, 0);
+
+  return (
+    <div className="space-y-10">
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+          Finance
+        </h1>
+        <p className="mt-1 text-sm text-muted">
+          Revenue, expenses, invoices, and payment methods including Pix.
+        </p>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+          <p className="text-xs font-medium text-muted">Month revenue</p>
+          <p className="mt-1 text-xl font-semibold tabular-nums">
+            {formatMoney(revenueMonth)}
+          </p>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+          <p className="text-xs font-medium text-muted">Month expenses</p>
+          <p className="mt-1 text-xl font-semibold tabular-nums">
+            {formatMoney(expenseMonth)}
+          </p>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+          <p className="text-xs font-medium text-muted">Month profit</p>
+          <p className="mt-1 text-xl font-semibold tabular-nums text-accent">
+            {formatMoney(profitMonth)}
+          </p>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+          <p className="text-xs font-medium text-muted">Outstanding</p>
+          <p className="mt-1 text-xl font-semibold tabular-nums">
+            {formatMoney(pendingDebt)}
+          </p>
+        </div>
+      </div>
+      <div className="grid gap-8 lg:grid-cols-2">
+        <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+          <h2 className="text-sm font-semibold text-foreground">
+            Revenue by method (this month)
+          </h2>
+          <div className="mt-4 h-64 w-full min-w-0">
+            <RevenueByMethodChart data={chartData} />
+          </div>
+        </div>
+        <div className="space-y-6">
+          <NewPaymentForm clients={clients ?? []} />
+          <NewExpenseForm />
+          <NewInvoiceForm clients={clients ?? []} />
+        </div>
+      </div>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+          <h2 className="text-sm font-semibold text-foreground">Recent payments</h2>
+          <ul className="mt-3 space-y-2 text-sm">
+            {(payments ?? []).length === 0 ? (
+              <li className="text-muted">None</li>
+            ) : (
+              (payments ?? []).map((p) => {
+                const row = p as typeof p & {
+                  clients: { name: string } | null;
+                };
+                return (
+                  <li key={p.id} className="flex justify-between gap-2 border-b border-border pb-2">
+                    <span className="text-muted capitalize">
+                      {row.clients?.name ?? "—"} · {p.method.replace("_", " ")}
+                    </span>
+                    <span className="font-medium tabular-nums">
+                      {formatMoney(p.amount_cents)} · {p.status}
+                    </span>
+                  </li>
+                );
+              })
+            )}
+          </ul>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+          <h2 className="text-sm font-semibold text-foreground">Recent expenses</h2>
+          <ul className="mt-3 space-y-2 text-sm">
+            {(expenses ?? []).length === 0 ? (
+              <li className="text-muted">None</li>
+            ) : (
+              (expenses ?? []).map((ex) => (
+                <li key={ex.id} className="flex justify-between gap-2 border-b border-border pb-2">
+                  <span className="text-muted">{ex.category}</span>
+                  <span className="font-medium tabular-nums">
+                    {formatMoney(ex.amount_cents)}
+                  </span>
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
