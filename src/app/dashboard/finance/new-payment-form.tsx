@@ -1,6 +1,7 @@
 "use client";
 
 import { usePreviewMode } from "@/components/preview-mode";
+import { paymentMethodPt } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
 import type { PaymentMethod, PaymentStatus } from "@/types/database";
 import { useRouter } from "next/navigation";
@@ -31,7 +32,9 @@ export function NewPaymentForm({
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (preview) {
-      setError("Preview mode: connect Supabase and set NEXT_PUBLIC_AUTH_BYPASS=0 to save.");
+      setError(
+        "Modo prévia: configure o Supabase e defina NEXT_PUBLIC_AUTH_BYPASS=0 para salvar.",
+      );
       return;
     }
     setError(null);
@@ -41,7 +44,7 @@ export function NewPaymentForm({
     } = await supabase.auth.getUser();
     if (!user) {
       setLoading(false);
-      setError("Not signed in");
+      setError("Sessão expirada. Entre novamente.");
       return;
     }
     const { data: profile } = await supabase
@@ -51,7 +54,7 @@ export function NewPaymentForm({
       .single();
     if (!profile?.organization_id) {
       setLoading(false);
-      setError("No organization");
+      setError("Empresa não encontrada");
       return;
     }
     const cents = Math.round(parseFloat(amount || "0") * 100);
@@ -74,7 +77,7 @@ export function NewPaymentForm({
 
   return (
     <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-      <h3 className="text-sm font-semibold text-foreground">Record payment</h3>
+      <h3 className="text-sm font-semibold text-foreground">Registrar pagamento</h3>
       <form onSubmit={onSubmit} className="mt-4 space-y-3">
         <select
           value={clientId}
@@ -92,7 +95,7 @@ export function NewPaymentForm({
           type="number"
           min={0}
           step={0.01}
-          placeholder="Amount (BRL)"
+          placeholder="Valor (R$)"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
@@ -105,7 +108,7 @@ export function NewPaymentForm({
           >
             {METHODS.map((m) => (
               <option key={m} value={m}>
-                {m.replace("_", " ")}
+                {paymentMethodPt(m)}
               </option>
             ))}
           </select>
@@ -114,9 +117,9 @@ export function NewPaymentForm({
             onChange={(e) => setStatus(e.target.value as PaymentStatus)}
             className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
           >
-            <option value="paid">Paid</option>
-            <option value="pending">Pending</option>
-            <option value="overdue">Overdue</option>
+            <option value="paid">Pago</option>
+            <option value="pending">Pendente</option>
+            <option value="overdue">Em atraso</option>
           </select>
         </div>
         {error ? (
@@ -127,7 +130,7 @@ export function NewPaymentForm({
           disabled={loading || preview || clients.length === 0}
           className="w-full rounded-lg bg-primary py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60"
         >
-          {preview ? "Preview — disabled" : loading ? "Saving…" : "Save payment"}
+          {preview ? "Prévia — desativado" : loading ? "Salvando…" : "Salvar pagamento"}
         </button>
       </form>
     </div>

@@ -21,7 +21,9 @@ export function NewExpenseForm() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (preview) {
-      setError("Preview mode: connect Supabase and set NEXT_PUBLIC_AUTH_BYPASS=0 to save.");
+      setError(
+        "Modo prévia: configure o Supabase e defina NEXT_PUBLIC_AUTH_BYPASS=0 para salvar.",
+      );
       return;
     }
     setError(null);
@@ -31,7 +33,7 @@ export function NewExpenseForm() {
     } = await supabase.auth.getUser();
     if (!user) {
       setLoading(false);
-      setError("Not signed in");
+      setError("Sessão expirada. Entre novamente.");
       return;
     }
     const { data: profile } = await supabase
@@ -41,13 +43,13 @@ export function NewExpenseForm() {
       .single();
     if (!profile?.organization_id) {
       setLoading(false);
-      setError("No organization");
+      setError("Empresa não encontrada");
       return;
     }
     const cents = Math.round(parseFloat(amount || "0") * 100);
     const { error: err } = await supabase.from("expenses").insert({
       organization_id: profile.organization_id,
-      category: category.trim() || "general",
+      category: category.trim() || "geral",
       description: description.trim() || null,
       amount_cents: cents,
       incurred_at: incurred,
@@ -65,17 +67,17 @@ export function NewExpenseForm() {
 
   return (
     <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-      <h3 className="text-sm font-semibold text-foreground">Add expense</h3>
+      <h3 className="text-sm font-semibold text-foreground">Nova despesa</h3>
       <form onSubmit={onSubmit} className="mt-4 space-y-3">
         <input
           required
-          placeholder="Category"
+          placeholder="Categoria"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
         />
         <textarea
-          placeholder="Description"
+          placeholder="Descrição"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={2}
@@ -86,7 +88,7 @@ export function NewExpenseForm() {
           type="number"
           min={0}
           step={0.01}
-          placeholder="Amount (BRL)"
+          placeholder="Valor (R$)"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
@@ -105,7 +107,7 @@ export function NewExpenseForm() {
           disabled={loading || preview}
           className="w-full rounded-lg border border-border py-2 text-sm font-semibold hover:bg-sidebar disabled:opacity-60"
         >
-          {preview ? "Preview — disabled" : loading ? "Saving…" : "Save expense"}
+          {preview ? "Prévia — desativado" : loading ? "Salvando…" : "Salvar despesa"}
         </button>
       </form>
     </div>

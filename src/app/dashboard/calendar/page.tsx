@@ -1,4 +1,4 @@
-import { formatDateTime } from "@/lib/format";
+import { formatDateTime, sessionStatusPt } from "@/lib/format";
 import { getOrgContext } from "@/lib/org-context";
 import {
   NewSessionForm,
@@ -74,16 +74,18 @@ export default async function CalendarPage({
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Calendar</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Agenda</h1>
         <p className="mt-1 text-sm text-muted">
-          Week view with conflict-safe scheduling (trainer and dog).
+          Visão semanal com detecção de conflito (mesmo adestrador ou mesmo cão).
         </p>
       </div>
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="space-y-3 lg:col-span-2">
           {sessions.length === 0 ? (
             <p className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted">
-              {ctx.bypass ? "Preview mode: no sessions." : "No sessions this week."}
+              {ctx.bypass
+                ? "Modo prévia: sem aulas."
+                : "Nenhuma aula nesta semana."}
             </p>
           ) : (
             sessions.map((row) => {
@@ -108,19 +110,20 @@ export default async function CalendarPage({
                     <div>
                       <p className="text-sm font-semibold text-foreground">
                         {s.title ||
-                          `${s.dog?.name ?? "Dog"} · ${s.client?.name ?? "Client"}`}
+                          `${s.dog?.name ?? "Cão"} · ${s.client?.name ?? "Cliente"}`}
                       </p>
                       <p className="text-xs text-muted">
-                        {s.service?.name ?? "Custom"} · {s.trainer?.full_name ?? "Trainer"}
+                        {s.service?.name ?? "Personalizado"} ·{" "}
+                        {s.trainer?.full_name ?? "Adestrador"}
                       </p>
                     </div>
-                    <span className="rounded-full bg-sidebar px-2 py-0.5 text-xs capitalize text-foreground">
-                      {s.status.replace("_", " ")}
+                    <span className="rounded-full bg-sidebar px-2 py-0.5 text-xs text-foreground">
+                      {sessionStatusPt(s.status)}
                     </span>
                   </div>
                   <p className="mt-2 text-xs text-muted">
                     {formatDateTime(s.start_at)} — {formatDateTime(s.end_at)}
-                    {s.attendance_confirmed ? " · Confirmed" : ""}
+                    {s.attendance_confirmed ? " · Presença confirmada" : ""}
                   </p>
                 </div>
               );

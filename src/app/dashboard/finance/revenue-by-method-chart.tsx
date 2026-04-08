@@ -16,7 +16,9 @@ export function RevenueByMethodChart({
   data: { method: string; revenue: number }[];
 }) {
   if (data.length === 0) {
-    return <p className="text-sm text-muted">No paid payments this month.</p>;
+    return (
+      <p className="text-sm text-muted">Nenhum pagamento recebido neste mês.</p>
+    );
   }
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -30,7 +32,7 @@ export function RevenueByMethodChart({
               style: "currency",
               currency: "BRL",
             }).format(Number(v)),
-            "Revenue",
+            "Receita",
           ]}
         />
         <Bar dataKey="revenue" fill="#2563eb" radius={[4, 4, 0, 0]} />

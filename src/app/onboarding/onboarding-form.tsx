@@ -5,7 +5,7 @@ import { useState } from "react";
 
 export function OnboardingForm({ defaultName }: { defaultName: string }) {
   const [name, setName] = useState(
-    defaultName ? `${defaultName}'s Training` : "",
+    defaultName ? `Adestramento ${defaultName}` : "",
   );
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -25,7 +25,7 @@ export function OnboardingForm({ defaultName }: { defaultName: string }) {
       return;
     }
     if (!data) {
-      setError("Could not create organization");
+      setError("Não foi possível criar a empresa");
       return;
     }
     window.location.href = "/dashboard";
@@ -35,7 +35,7 @@ export function OnboardingForm({ defaultName }: { defaultName: string }) {
     <form onSubmit={onSubmit} className="space-y-4">
       <div>
         <label htmlFor="org" className="block text-sm font-medium text-foreground">
-          Business name
+          Nome comercial
         </label>
         <input
           id="org"
@@ -44,7 +44,7 @@ export function OnboardingForm({ defaultName }: { defaultName: string }) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary focus:ring-2"
-          placeholder="Pawsitive K9 Academy"
+          placeholder="Ex.: Cão em Foco Adestramento"
         />
       </div>
       {error ? (
@@ -55,7 +55,7 @@ export function OnboardingForm({ defaultName }: { defaultName: string }) {
         disabled={loading}
         className="w-full rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60"
       >
-        {loading ? "Creating workspace…" : "Continue to dashboard"}
+        {loading ? "Criando ambiente…" : "Ir para o painel"}
       </button>
     </form>
   );

@@ -20,7 +20,7 @@ export function ClientSearch({ initial }: { initial: string }) {
   return (
     <input
       type="search"
-      placeholder="Search name, email, phone…"
+      placeholder="Buscar nome, e-mail, telefone…"
       defaultValue={initial}
       onChange={(e) => onChange(e.target.value)}
       className="w-full max-w-sm rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none ring-primary focus:ring-2 sm:w-72"

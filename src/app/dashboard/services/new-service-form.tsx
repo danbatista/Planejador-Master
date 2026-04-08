@@ -7,12 +7,12 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const KINDS: { value: ServiceKind; label: string }[] = [
-  { value: "private_lesson", label: "Private lesson" },
-  { value: "group_lesson", label: "Group lesson" },
-  { value: "boarding", label: "Boarding" },
-  { value: "behavior_correction", label: "Behavior correction" },
-  { value: "puppy_training", label: "Puppy training" },
-  { value: "custom", label: "Custom" },
+  { value: "private_lesson", label: "Aula particular" },
+  { value: "group_lesson", label: "Aula em grupo" },
+  { value: "boarding", label: "Hospedagem" },
+  { value: "behavior_correction", label: "Correção comportamental" },
+  { value: "puppy_training", label: "Filhote" },
+  { value: "custom", label: "Personalizado" },
 ];
 
 export function NewServiceForm() {
@@ -30,7 +30,9 @@ export function NewServiceForm() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (preview) {
-      setError("Preview mode: connect Supabase and set NEXT_PUBLIC_AUTH_BYPASS=0 to save.");
+      setError(
+        "Modo prévia: configure o Supabase e defina NEXT_PUBLIC_AUTH_BYPASS=0 para salvar.",
+      );
       return;
     }
     setError(null);
@@ -40,7 +42,7 @@ export function NewServiceForm() {
     } = await supabase.auth.getUser();
     if (!user) {
       setLoading(false);
-      setError("Not signed in");
+      setError("Sessão expirada. Entre novamente.");
       return;
     }
     const { data: profile } = await supabase
@@ -50,7 +52,7 @@ export function NewServiceForm() {
       .single();
     if (!profile?.organization_id) {
       setLoading(false);
-      setError("No organization");
+      setError("Empresa não encontrada");
       return;
     }
     const priceCents = Math.round(parseFloat(price || "0") * 100);
@@ -75,11 +77,11 @@ export function NewServiceForm() {
 
   return (
     <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-      <h3 className="text-sm font-semibold text-foreground">New service</h3>
+      <h3 className="text-sm font-semibold text-foreground">Novo serviço</h3>
       <form onSubmit={onSubmit} className="mt-4 space-y-3">
         <input
           required
-          placeholder="Name"
+          placeholder="Nome"
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
@@ -96,7 +98,7 @@ export function NewServiceForm() {
           ))}
         </select>
         <textarea
-          placeholder="Description"
+          placeholder="Descrição"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={2}
@@ -107,7 +109,7 @@ export function NewServiceForm() {
             type="number"
             min={15}
             step={5}
-            placeholder="Duration (min)"
+            placeholder="Duração (min)"
             value={duration}
             onChange={(e) => setDuration(e.target.value)}
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
@@ -116,7 +118,7 @@ export function NewServiceForm() {
             type="number"
             min={0}
             step={0.01}
-            placeholder="Price (BRL)"
+            placeholder="Preço (R$)"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
@@ -130,7 +132,7 @@ export function NewServiceForm() {
           disabled={loading || preview}
           className="w-full rounded-lg bg-primary py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60"
         >
-          {preview ? "Preview — disabled" : loading ? "Saving…" : "Add service"}
+          {preview ? "Prévia — desativado" : loading ? "Salvando…" : "Adicionar serviço"}
         </button>
       </form>
     </div>

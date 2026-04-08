@@ -1,4 +1,4 @@
-import { formatMoney } from "@/lib/format";
+import { formatMoney, paymentMethodPt, paymentStatusPt } from "@/lib/format";
 import { getOrgContext } from "@/lib/org-context";
 import { NewExpenseForm } from "./new-expense-form";
 import { RevenueByMethodChart } from "./revenue-by-method-chart";
@@ -67,7 +67,7 @@ export default async function FinancePage() {
     }
   }
   const chartData = Object.entries(byMethod).map(([method, cents]) => ({
-    method: method.replace("_", " "),
+    method: paymentMethodPt(method),
     revenue: cents / 100,
   }));
 
@@ -75,35 +75,37 @@ export default async function FinancePage() {
     .filter((p) => p.status === "pending" || p.status === "overdue")
     .reduce((s, p) => s + p.amount_cents, 0);
 
+  const previewClient = { id: "preview-client", name: "Cliente (prévia)" };
+
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Finance</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Financeiro</h1>
         <p className="mt-1 text-sm text-muted">
-          Revenue, expenses, invoices, and payment methods including Pix.
+          Receitas, despesas, faturas e formas de pagamento (Pix, cartão, etc.).
         </p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-          <p className="text-xs font-medium text-muted">Month revenue</p>
+          <p className="text-xs font-medium text-muted">Receita no mês</p>
           <p className="mt-1 text-xl font-semibold tabular-nums">
             {formatMoney(revenueMonth)}
           </p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-          <p className="text-xs font-medium text-muted">Month expenses</p>
+          <p className="text-xs font-medium text-muted">Despesas no mês</p>
           <p className="mt-1 text-xl font-semibold tabular-nums">
             {formatMoney(expenseMonth)}
           </p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-          <p className="text-xs font-medium text-muted">Month profit</p>
+          <p className="text-xs font-medium text-muted">Lucro no mês</p>
           <p className="mt-1 text-xl font-semibold tabular-nums text-accent">
             {formatMoney(profitMonth)}
           </p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-          <p className="text-xs font-medium text-muted">Outstanding</p>
+          <p className="text-xs font-medium text-muted">A receber</p>
           <p className="mt-1 text-xl font-semibold tabular-nums">
             {formatMoney(pendingDebt)}
           </p>
@@ -112,7 +114,7 @@ export default async function FinancePage() {
       <div className="grid gap-8 lg:grid-cols-2">
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
           <h2 className="text-sm font-semibold text-foreground">
-            Revenue by method (this month)
+            Receita por forma de pagamento (mês)
           </h2>
           <div className="mt-4 h-64 w-full min-w-0">
             <RevenueByMethodChart data={chartData} />
@@ -120,28 +122,20 @@ export default async function FinancePage() {
         </div>
         <div className="space-y-6">
           <NewPaymentForm
-            clients={
-              ctx.bypass && clients.length === 0
-                ? [{ id: "preview-client", name: "Preview client" }]
-                : clients
-            }
+            clients={ctx.bypass && clients.length === 0 ? [previewClient] : clients}
           />
           <NewExpenseForm />
           <NewInvoiceForm
-            clients={
-              ctx.bypass && clients.length === 0
-                ? [{ id: "preview-client", name: "Preview client" }]
-                : clients
-            }
+            clients={ctx.bypass && clients.length === 0 ? [previewClient] : clients}
           />
         </div>
       </div>
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-foreground">Recent payments</h2>
+          <h2 className="text-sm font-semibold text-foreground">Pagamentos recentes</h2>
           <ul className="mt-3 space-y-2 text-sm">
             {payments.length === 0 ? (
-              <li className="text-muted">{ctx.bypass ? "Preview mode." : "None"}</li>
+              <li className="text-muted">{ctx.bypass ? "Modo prévia." : "Nenhum."}</li>
             ) : (
               payments.map((p) => {
                 const row = p as typeof p & {
@@ -149,11 +143,11 @@ export default async function FinancePage() {
                 };
                 return (
                   <li key={p.id} className="flex justify-between gap-2 border-b border-border pb-2">
-                    <span className="text-muted capitalize">
-                      {row.clients?.name ?? "—"} · {p.method.replace("_", " ")}
+                    <span className="text-muted">
+                      {row.clients?.name ?? "—"} · {paymentMethodPt(p.method)}
                     </span>
                     <span className="font-medium tabular-nums">
-                      {formatMoney(p.amount_cents)} · {p.status}
+                      {formatMoney(p.amount_cents)} · {paymentStatusPt(p.status)}
                     </span>
                   </li>
                 );
@@ -162,10 +156,10 @@ export default async function FinancePage() {
           </ul>
         </div>
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-foreground">Recent expenses</h2>
+          <h2 className="text-sm font-semibold text-foreground">Despesas recentes</h2>
           <ul className="mt-3 space-y-2 text-sm">
             {expenses.length === 0 ? (
-              <li className="text-muted">{ctx.bypass ? "Preview mode." : "None"}</li>
+              <li className="text-muted">{ctx.bypass ? "Modo prévia." : "Nenhuma."}</li>
             ) : (
               expenses.map((ex) => (
                 <li key={ex.id} className="flex justify-between gap-2 border-b border-border pb-2">

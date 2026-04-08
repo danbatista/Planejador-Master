@@ -22,7 +22,9 @@ export function ProgressForm({ dogId }: { dogId: string }) {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (preview) {
-      setError("Preview mode: connect Supabase and set NEXT_PUBLIC_AUTH_BYPASS=0 to save.");
+      setError(
+        "Modo prévia: configure o Supabase e defina NEXT_PUBLIC_AUTH_BYPASS=0 para salvar.",
+      );
       return;
     }
     setError(null);
@@ -32,7 +34,7 @@ export function ProgressForm({ dogId }: { dogId: string }) {
     } = await supabase.auth.getUser();
     if (!user) {
       setLoading(false);
-      setError("Not signed in");
+      setError("Sessão expirada. Entre novamente.");
       return;
     }
     const { data: profile } = await supabase
@@ -42,7 +44,7 @@ export function ProgressForm({ dogId }: { dogId: string }) {
       .single();
     if (!profile?.organization_id) {
       setLoading(false);
-      setError("No organization");
+      setError("Empresa não encontrada");
       return;
     }
     const { error: err } = await supabase.from("progress_entries").insert({
@@ -83,51 +85,51 @@ export function ProgressForm({ dogId }: { dogId: string }) {
 
   return (
     <div className="h-fit rounded-xl border border-border bg-card p-5 shadow-sm">
-      <h2 className="text-sm font-semibold text-foreground">Add progress</h2>
+      <h2 className="text-sm font-semibold text-foreground">Novo registro</h2>
       <form onSubmit={onSubmit} className="mt-4 space-y-3">
         <input
-          placeholder="Title"
+          placeholder="Título"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
         />
         <textarea
-          placeholder="Notes"
+          placeholder="Anotações"
           value={body}
           onChange={(e) => setBody(e.target.value)}
           rows={3}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
         />
         <textarea
-          placeholder="Goals"
+          placeholder="Objetivos"
           value={goals}
           onChange={(e) => setGoals(e.target.value)}
           rows={2}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
         />
         <textarea
-          placeholder="Behavior improvement"
+          placeholder="Evolução comportamental"
           value={behavior}
           onChange={(e) => setBehavior(e.target.value)}
           rows={2}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
         />
         <textarea
-          placeholder="Training plan"
+          placeholder="Plano de treino"
           value={plan}
           onChange={(e) => setPlan(e.target.value)}
           rows={2}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
         />
         <textarea
-          placeholder="Session result"
+          placeholder="Resultado da aula"
           value={sessionResult}
           onChange={(e) => setSessionResult(e.target.value)}
           rows={2}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
         />
         <textarea
-          placeholder="Instructor comment"
+          placeholder="Comentário do adestrador"
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           rows={2}
@@ -141,7 +143,7 @@ export function ProgressForm({ dogId }: { dogId: string }) {
           disabled={loading || preview}
           className="w-full rounded-lg bg-primary py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60"
         >
-          {preview ? "Preview — disabled" : loading ? "Saving…" : "Save entry"}
+          {preview ? "Prévia — desativado" : loading ? "Salvando…" : "Salvar registro"}
         </button>
       </form>
     </div>

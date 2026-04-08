@@ -9,21 +9,21 @@ export default function SignupPage() {
           href="/"
           className="text-sm font-medium text-primary hover:underline"
         >
-          ← Back
+          ← Voltar
         </Link>
         <h1 className="mt-6 text-2xl font-semibold tracking-tight text-foreground">
-          Create account
+          Criar conta
         </h1>
         <p className="mt-2 text-sm text-muted">
-          Start your dog training workspace in minutes.
+          Comece o painel da sua empresa de adestramento em minutos.
         </p>
         <div className="mt-8 rounded-2xl border border-border bg-card p-6 shadow-sm">
           <SignupForm />
         </div>
         <p className="mt-6 text-center text-sm text-muted">
-          Already have an account?{" "}
+          Já tem conta?{" "}
           <Link href="/login" className="font-medium text-primary hover:underline">
-            Sign in
+            Entrar
           </Link>
         </p>
       </div>

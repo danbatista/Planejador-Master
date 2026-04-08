@@ -2,6 +2,12 @@ import { canManageTeam } from "@/lib/permissions";
 import { getOrgContext } from "@/lib/org-context";
 import { RoleSelect } from "./role-select";
 
+const roleLabel: Record<string, string> = {
+  admin: "Administrador",
+  trainer: "Adestrador",
+  assistant: "Assistente",
+};
+
 export default async function TeamPage() {
   const ctx = await getOrgContext();
   let members: {
@@ -34,17 +40,17 @@ export default async function TeamPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Team</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Equipe</h1>
         <p className="mt-1 text-sm text-muted">
-          Admin, trainer, and assistant roles with session and finance permissions.
+          Administrador, adestrador e assistente, com permissões distintas.
         </p>
       </div>
       <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-border bg-sidebar text-xs font-medium uppercase text-muted">
             <tr>
-              <th className="px-4 py-3">Member</th>
-              <th className="px-4 py-3">Role</th>
+              <th className="px-4 py-3">Membro</th>
+              <th className="px-4 py-3">Função</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -58,11 +64,14 @@ export default async function TeamPage() {
                 </td>
                 <td className="px-4 py-3">
                   {ctx.bypass ? (
-                    <span className="capitalize text-muted">{m.role}</span>
+                    <span className="text-muted">{roleLabel[m.role] ?? m.role}</span>
                   ) : canManageTeam(ctx.profile.role) && m.id !== ctx.profile.id ? (
-                    <RoleSelect memberId={m.id} currentRole={m.role as "admin" | "trainer" | "assistant"} />
+                    <RoleSelect
+                      memberId={m.id}
+                      currentRole={m.role as "admin" | "trainer" | "assistant"}
+                    />
                   ) : (
-                    <span className="capitalize text-muted">{m.role}</span>
+                    <span className="text-muted">{roleLabel[m.role] ?? m.role}</span>
                   )}
                 </td>
               </tr>
@@ -71,10 +80,10 @@ export default async function TeamPage() {
         </table>
       </div>
       <p className="text-sm text-muted">
-        Invite teammates from Supabase Auth (email invite) or add an API route using{" "}
-        <code className="rounded bg-sidebar px-1 text-xs">inviteUserByEmail</code> with the
-        service role, then attach{" "}
-        <code className="rounded bg-sidebar px-1 text-xs">organization_id</code> on first login.
+        Convide por e-mail no Supabase Auth ou crie uma rota com{" "}
+        <code className="rounded bg-sidebar px-1 text-xs">inviteUserByEmail</code> (service
+        role) e vincule <code className="rounded bg-sidebar px-1 text-xs">organization_id</code>{" "}
+        no primeiro acesso.
       </p>
     </div>
   );

@@ -23,7 +23,9 @@ export function NewDogForm({ clientId }: { clientId: string }) {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (preview) {
-      setError("Preview mode: connect Supabase and set NEXT_PUBLIC_AUTH_BYPASS=0 to save.");
+      setError(
+        "Modo prévia: configure o Supabase e defina NEXT_PUBLIC_AUTH_BYPASS=0 para salvar.",
+      );
       return;
     }
     setError(null);
@@ -33,7 +35,7 @@ export function NewDogForm({ clientId }: { clientId: string }) {
     } = await supabase.auth.getUser();
     if (!user) {
       setLoading(false);
-      setError("Not signed in");
+      setError("Sessão expirada. Entre novamente.");
       return;
     }
     const { data: profile } = await supabase
@@ -43,7 +45,7 @@ export function NewDogForm({ clientId }: { clientId: string }) {
       .single();
     if (!profile?.organization_id) {
       setLoading(false);
-      setError("No organization");
+      setError("Empresa não encontrada");
       return;
     }
     const { data, error: err } = await supabase
@@ -88,17 +90,17 @@ export function NewDogForm({ clientId }: { clientId: string }) {
 
   return (
     <div className="h-fit rounded-xl border border-border bg-card p-5 shadow-sm">
-      <h2 className="text-sm font-semibold text-foreground">Add dog</h2>
+      <h2 className="text-sm font-semibold text-foreground">Adicionar cão</h2>
       <form onSubmit={onSubmit} className="mt-4 space-y-3">
         <input
           required
-          placeholder="Dog name"
+          placeholder="Nome do cão"
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
         />
         <input
-          placeholder="Breed"
+          placeholder="Raça"
           value={breed}
           onChange={(e) => setBreed(e.target.value)}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
@@ -107,7 +109,7 @@ export function NewDogForm({ clientId }: { clientId: string }) {
           <input
             type="number"
             min={0}
-            placeholder="Age (months)"
+            placeholder="Idade (meses)"
             value={ageMonths}
             onChange={(e) => setAgeMonths(e.target.value)}
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
@@ -116,34 +118,34 @@ export function NewDogForm({ clientId }: { clientId: string }) {
             type="number"
             step="0.1"
             min={0}
-            placeholder="Weight (kg)"
+            placeholder="Peso (kg)"
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
           />
         </div>
         <input
-          placeholder="Temperament"
+          placeholder="Temperamento"
           value={temperament}
           onChange={(e) => setTemperament(e.target.value)}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
         />
         <textarea
-          placeholder="Behavioral problems"
+          placeholder="Questões comportamentais"
           value={behavioral}
           onChange={(e) => setBehavioral(e.target.value)}
           rows={2}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
         />
         <textarea
-          placeholder="Medical notes"
+          placeholder="Observações de saúde"
           value={medical}
           onChange={(e) => setMedical(e.target.value)}
           rows={2}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
         />
         <textarea
-          placeholder="Training goals"
+          placeholder="Objetivos do adestramento"
           value={goals}
           onChange={(e) => setGoals(e.target.value)}
           rows={2}
@@ -157,7 +159,7 @@ export function NewDogForm({ clientId }: { clientId: string }) {
           disabled={loading || preview}
           className="w-full rounded-lg bg-accent py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 dark:text-slate-900"
         >
-          {preview ? "Preview — disabled" : loading ? "Saving…" : "Save dog"}
+          {preview ? "Prévia — desativado" : loading ? "Salvando…" : "Salvar cão"}
         </button>
       </form>
     </div>

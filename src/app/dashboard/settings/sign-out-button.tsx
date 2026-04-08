@@ -23,7 +23,11 @@ export function SignOutButton({ disabled }: { disabled?: boolean }) {
       disabled={loading || disabled}
       className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-sidebar disabled:opacity-60"
     >
-      {disabled ? "Sign out (disabled in preview)" : loading ? "Signing out…" : "Sign out"}
+      {disabled
+        ? "Sair (desativado na prévia)"
+        : loading
+          ? "Saindo…"
+          : "Sair"}
     </button>
   );
 }

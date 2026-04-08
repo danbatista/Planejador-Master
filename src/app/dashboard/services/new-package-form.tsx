@@ -20,7 +20,9 @@ export function NewPackageForm() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (preview) {
-      setError("Preview mode: connect Supabase and set NEXT_PUBLIC_AUTH_BYPASS=0 to save.");
+      setError(
+        "Modo prévia: configure o Supabase e defina NEXT_PUBLIC_AUTH_BYPASS=0 para salvar.",
+      );
       return;
     }
     setError(null);
@@ -30,7 +32,7 @@ export function NewPackageForm() {
     } = await supabase.auth.getUser();
     if (!user) {
       setLoading(false);
-      setError("Not signed in");
+      setError("Sessão expirada. Entre novamente.");
       return;
     }
     const { data: profile } = await supabase
@@ -40,7 +42,7 @@ export function NewPackageForm() {
       .single();
     if (!profile?.organization_id) {
       setLoading(false);
-      setError("No organization");
+      setError("Empresa não encontrada");
       return;
     }
     const priceCents = Math.round(parseFloat(price || "0") * 100);
@@ -67,17 +69,17 @@ export function NewPackageForm() {
 
   return (
     <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-      <h3 className="text-sm font-semibold text-foreground">New package</h3>
+      <h3 className="text-sm font-semibold text-foreground">Novo pacote</h3>
       <form onSubmit={onSubmit} className="mt-4 space-y-3">
         <input
           required
-          placeholder="Name (e.g. 10-lesson bundle)"
+          placeholder="Ex.: pacote 10 aulas"
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
         />
         <textarea
-          placeholder="Description"
+          placeholder="Descrição"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={2}
@@ -87,7 +89,7 @@ export function NewPackageForm() {
           <input
             type="number"
             min={1}
-            placeholder="Sessions included"
+            placeholder="Aulas incluídas"
             value={sessions}
             onChange={(e) => setSessions(e.target.value)}
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
@@ -95,7 +97,7 @@ export function NewPackageForm() {
           <input
             type="number"
             min={0}
-            placeholder="Validity (days)"
+            placeholder="Validade (dias)"
             value={validity}
             onChange={(e) => setValidity(e.target.value)}
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
@@ -105,7 +107,7 @@ export function NewPackageForm() {
           type="number"
           min={0}
           step={0.01}
-          placeholder="Price (BRL)"
+          placeholder="Preço (R$)"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
@@ -118,7 +120,7 @@ export function NewPackageForm() {
           disabled={loading || preview}
           className="w-full rounded-lg bg-accent py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 dark:text-slate-900"
         >
-          {preview ? "Preview — disabled" : loading ? "Saving…" : "Add package"}
+          {preview ? "Prévia — desativado" : loading ? "Salvando…" : "Adicionar pacote"}
         </button>
       </form>
     </div>

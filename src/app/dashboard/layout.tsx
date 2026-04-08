@@ -12,8 +12,8 @@ export default async function DashboardLayout({
     <PreviewModeProvider active={ctx.bypass}>
       {ctx.bypass ? (
         <div className="border-b border-amber-500/40 bg-amber-500/15 px-4 py-2 text-center text-xs font-medium text-amber-950 dark:text-amber-100">
-          Preview mode: auth and data are bypassed. Set NEXT_PUBLIC_AUTH_BYPASS=0 for real
-          Supabase.
+          Modo prévia: login e banco ignorados. Defina NEXT_PUBLIC_AUTH_BYPASS=0 e configure o
+          Supabase para uso real.
         </div>
       ) : null}
       <AppShell profile={ctx.profile}>{children}</AppShell>

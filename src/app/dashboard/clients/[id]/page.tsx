@@ -1,4 +1,10 @@
-import { formatDateTime, formatMoney } from "@/lib/format";
+import {
+  formatDateTime,
+  formatMoney,
+  paymentMethodPt,
+  paymentStatusPt,
+  sessionStatusPt,
+} from "@/lib/format";
 import { getOrgContext } from "@/lib/org-context";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -20,35 +26,35 @@ export default async function ClientDetailPage({
             href="/dashboard/clients"
             className="text-sm font-medium text-primary hover:underline"
           >
-            ← Clients
+            ← Clientes
           </Link>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
-            Sample Client
+            Cliente exemplo
           </h1>
-          <p className="mt-1 text-xs text-muted">Route id: {id} (preview only)</p>
+          <p className="mt-1 text-xs text-muted">ID da rota: {id} (somente prévia)</p>
           <div className="mt-2 flex flex-wrap gap-4 text-sm text-muted">
-            <span>sample@example.com</span>
-            <span>+1 555 0100</span>
+            <span>exemplo@email.com</span>
+            <span>(11) 99999-0000</span>
           </div>
         </div>
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
             <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
-              <h2 className="text-sm font-semibold text-foreground">Dogs</h2>
-              <p className="mt-4 text-sm text-muted">No dogs in preview.</p>
+              <h2 className="text-sm font-semibold text-foreground">Cães</h2>
+              <p className="mt-4 text-sm text-muted">Nenhum cão na prévia.</p>
             </section>
             <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
-              <h2 className="text-sm font-semibold text-foreground">Service history</h2>
-              <p className="mt-4 text-sm text-muted">No sessions in preview.</p>
+              <h2 className="text-sm font-semibold text-foreground">Histórico de aulas</h2>
+              <p className="mt-4 text-sm text-muted">Nenhuma aula na prévia.</p>
             </section>
             <div className="grid gap-6 sm:grid-cols-2">
               <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
-                <h2 className="text-sm font-semibold text-foreground">Payments</h2>
-                <p className="mt-3 text-sm text-muted">None</p>
+                <h2 className="text-sm font-semibold text-foreground">Pagamentos</h2>
+                <p className="mt-3 text-sm text-muted">Nenhum</p>
               </section>
               <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
-                <h2 className="text-sm font-semibold text-foreground">Invoices</h2>
-                <p className="mt-3 text-sm text-muted">None</p>
+                <h2 className="text-sm font-semibold text-foreground">Faturas</h2>
+                <p className="mt-3 text-sm text-muted">Nenhuma</p>
               </section>
             </div>
           </div>
@@ -101,7 +107,7 @@ export default async function ClientDetailPage({
           href="/dashboard/clients"
           className="text-sm font-medium text-primary hover:underline"
         >
-          ← Clients
+          ← Clientes
         </Link>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
           {client.name}
@@ -120,10 +126,10 @@ export default async function ClientDetailPage({
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
-            <h2 className="text-sm font-semibold text-foreground">Dogs</h2>
+            <h2 className="text-sm font-semibold text-foreground">Cães</h2>
             <ul className="mt-4 space-y-2">
               {(dogs ?? []).length === 0 ? (
-                <li className="text-sm text-muted">No dogs yet.</li>
+                <li className="text-sm text-muted">Nenhum cão ainda.</li>
               ) : (
                 (dogs ?? []).map((d) => (
                   <li key={d.id}>
@@ -133,9 +139,9 @@ export default async function ClientDetailPage({
                     >
                       <span className="font-medium text-foreground">{d.name}</span>
                       <span className="text-xs text-muted">
-                        {[d.breed, d.age_months != null ? `${d.age_months} mo` : null]
+                        {[d.breed, d.age_months != null ? `${d.age_months} meses` : null]
                           .filter(Boolean)
-                          .join(" · ") || "Profile"}
+                          .join(" · ") || "Perfil"}
                       </span>
                     </Link>
                   </li>
@@ -144,10 +150,10 @@ export default async function ClientDetailPage({
             </ul>
           </section>
           <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
-            <h2 className="text-sm font-semibold text-foreground">Service history</h2>
+            <h2 className="text-sm font-semibold text-foreground">Histórico de aulas</h2>
             <ul className="mt-4 divide-y divide-border">
               {(sessions ?? []).length === 0 ? (
-                <li className="py-3 text-sm text-muted">No sessions yet.</li>
+                <li className="py-3 text-sm text-muted">Nenhuma aula ainda.</li>
               ) : (
                 (sessions ?? []).map((s) => {
                   const row = s as unknown as {
@@ -160,9 +166,9 @@ export default async function ClientDetailPage({
                   return (
                     <li key={row.id} className="flex flex-wrap items-center gap-2 py-3">
                       <span className="text-sm font-medium text-foreground">
-                        {row.title || row.dogs?.name || "Session"}
+                        {row.title || row.dogs?.name || "Aula"}
                       </span>
-                      <span className="text-xs capitalize text-muted">{row.status}</span>
+                      <span className="text-xs text-muted">{sessionStatusPt(row.status)}</span>
                       <span className="ml-auto text-xs text-muted">
                         {formatDateTime(row.start_at)}
                       </span>
@@ -174,14 +180,14 @@ export default async function ClientDetailPage({
           </section>
           <div className="grid gap-6 sm:grid-cols-2">
             <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
-              <h2 className="text-sm font-semibold text-foreground">Payments</h2>
+              <h2 className="text-sm font-semibold text-foreground">Pagamentos</h2>
               <ul className="mt-3 space-y-2 text-sm">
                 {(payments ?? []).length === 0 ? (
-                  <li className="text-muted">None</li>
+                  <li className="text-muted">Nenhum</li>
                 ) : (
                   (payments ?? []).map((p) => (
                     <li key={p.id} className="flex justify-between gap-2">
-                      <span className="text-muted capitalize">{p.method}</span>
+                      <span className="text-muted">{paymentMethodPt(p.method)}</span>
                       <span className="font-medium tabular-nums">
                         {formatMoney(p.amount_cents)}
                       </span>
@@ -191,15 +197,15 @@ export default async function ClientDetailPage({
               </ul>
             </section>
             <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
-              <h2 className="text-sm font-semibold text-foreground">Invoices</h2>
+              <h2 className="text-sm font-semibold text-foreground">Faturas</h2>
               <ul className="mt-3 space-y-2 text-sm">
                 {(invoices ?? []).length === 0 ? (
-                  <li className="text-muted">None</li>
+                  <li className="text-muted">Nenhuma</li>
                 ) : (
                   (invoices ?? []).map((inv) => (
                     <li key={inv.id} className="flex justify-between gap-2">
                       <span className="text-muted">{inv.invoice_number}</span>
-                      <span className="font-medium capitalize">{inv.status}</span>
+                      <span className="font-medium">{paymentStatusPt(inv.status)}</span>
                     </li>
                   ))
                 )}

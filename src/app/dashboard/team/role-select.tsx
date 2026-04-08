@@ -5,7 +5,11 @@ import type { UserRole } from "@/types/database";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-const ROLES: UserRole[] = ["admin", "trainer", "assistant"];
+const ROLES: { value: UserRole; label: string }[] = [
+  { value: "admin", label: "Administrador" },
+  { value: "trainer", label: "Adestrador" },
+  { value: "assistant", label: "Assistente" },
+];
 
 export function RoleSelect({
   memberId,
@@ -35,11 +39,11 @@ export function RoleSelect({
       value={role}
       disabled={pending}
       onChange={(e) => onChange(e.target.value as UserRole)}
-      className="rounded-lg border border-border bg-background px-2 py-1 text-sm capitalize"
+      className="rounded-lg border border-border bg-background px-2 py-1 text-sm"
     >
       {ROLES.map((r) => (
-        <option key={r} value={r}>
-          {r}
+        <option key={r.value} value={r.value}>
+          {r.label}
         </option>
       ))}
     </select>

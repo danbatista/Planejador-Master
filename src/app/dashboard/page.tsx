@@ -7,16 +7,21 @@ export default async function DashboardPage() {
   const ctx = await getOrgContext();
   if (ctx.bypass) {
     const stats = [
-      { label: "Clients", value: 0, href: "/dashboard/clients", icon: Users },
-      { label: "Dogs", value: 0, href: "/dashboard/clients", icon: Dog },
-      { label: "Today's sessions", value: 0, href: "/dashboard/calendar", icon: Calendar },
-      { label: "Month revenue", value: formatMoney(0), href: "/dashboard/finance", icon: DollarSign },
+      { label: "Clientes", value: 0, href: "/dashboard/clients", icon: Users },
+      { label: "Cães", value: 0, href: "/dashboard/clients", icon: Dog },
+      { label: "Aulas hoje", value: 0, href: "/dashboard/calendar", icon: Calendar },
+      {
+        label: "Receita no mês",
+        value: formatMoney(0),
+        href: "/dashboard/finance",
+        icon: DollarSign,
+      },
     ];
     return (
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Dashboard</h1>
-          <p className="mt-1 text-sm text-muted">Snapshot of your training business today.</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Painel</h1>
+          <p className="mt-1 text-sm text-muted">Resumo do seu negócio hoje.</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {stats.map((s) => (
@@ -35,17 +40,17 @@ export default async function DashboardPage() {
         </div>
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-            <h2 className="text-sm font-semibold text-foreground">Upcoming sessions</h2>
-            <p className="mt-4 text-sm text-muted">No upcoming sessions.</p>
+            <h2 className="text-sm font-semibold text-foreground">Próximas aulas</h2>
+            <p className="mt-4 text-sm text-muted">Nenhuma aula agendada.</p>
           </div>
           <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-            <h2 className="text-sm font-semibold text-foreground">Alerts</h2>
-            <p className="mt-4 text-sm text-muted">0 pending or overdue payments</p>
+            <h2 className="text-sm font-semibold text-foreground">Alertas</h2>
+            <p className="mt-4 text-sm text-muted">0 pagamentos pendentes ou em atraso</p>
           </div>
         </div>
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-foreground">Recent activity</h2>
-          <p className="mt-4 text-sm text-muted">No activity yet.</p>
+          <h2 className="text-sm font-semibold text-foreground">Atividade recente</h2>
+          <p className="mt-4 text-sm text-muted">Nenhuma atividade ainda.</p>
         </div>
       </div>
     );
@@ -128,25 +133,25 @@ export default async function DashboardPage() {
 
   const stats = [
     {
-      label: "Clients",
+      label: "Clientes",
       value: clientsCount.count ?? 0,
       href: "/dashboard/clients",
       icon: Users,
     },
     {
-      label: "Dogs",
+      label: "Cães",
       value: dogsCount.count ?? 0,
       href: "/dashboard/clients",
       icon: Dog,
     },
     {
-      label: "Today's sessions",
+      label: "Aulas hoje",
       value: todaySessions.count ?? 0,
       href: "/dashboard/calendar",
       icon: Calendar,
     },
     {
-      label: "Month revenue",
+      label: "Receita no mês",
       value: formatMoney(monthRevenue),
       href: "/dashboard/finance",
       icon: DollarSign,
@@ -156,8 +161,8 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Dashboard</h1>
-        <p className="mt-1 text-sm text-muted">Snapshot of your training business today.</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Painel</h1>
+        <p className="mt-1 text-sm text-muted">Resumo do seu negócio hoje.</p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((s) => (
@@ -177,17 +182,17 @@ export default async function DashboardPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-foreground">Upcoming sessions</h2>
+            <h2 className="text-sm font-semibold text-foreground">Próximas aulas</h2>
             <Link
               href="/dashboard/calendar"
               className="text-xs font-medium text-primary hover:underline"
             >
-              Open calendar
+              Ver agenda
             </Link>
           </div>
           <ul className="mt-4 space-y-3">
             {(upcoming.data ?? []).length === 0 ? (
-              <li className="text-sm text-muted">No upcoming sessions.</li>
+              <li className="text-sm text-muted">Nenhuma aula agendada.</li>
             ) : (
               (upcoming.data ?? []).map((row) => {
                 const r = row as unknown as {
@@ -206,10 +211,10 @@ export default async function DashboardPage() {
                   >
                     <span className="text-sm font-medium text-foreground">
                       {r.title ||
-                        `${r.dog?.name ?? "Dog"} · ${r.client?.name ?? "Client"}`}
+                        `${r.dog?.name ?? "Cão"} · ${r.client?.name ?? "Cliente"}`}
                     </span>
                     <span className="text-xs text-muted">
-                      {formatDateTime(r.start_at)} · {r.trainer?.full_name ?? "Trainer"}
+                      {formatDateTime(r.start_at)} · {r.trainer?.full_name ?? "Adestrador"}
                     </span>
                   </li>
                 );
@@ -219,32 +224,32 @@ export default async function DashboardPage() {
         </div>
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-foreground">Alerts</h2>
+            <h2 className="text-sm font-semibold text-foreground">Alertas</h2>
             <Link
               href="/dashboard/finance"
               className="text-xs font-medium text-primary hover:underline"
             >
-              Finance
+              Financeiro
             </Link>
           </div>
           <div className="mt-4 space-y-3 text-sm">
             <p className="rounded-lg bg-sidebar px-3 py-2 text-foreground">
-              <span className="font-medium">{pendingPayments.count ?? 0}</span> pending or
-              overdue payments
+              <span className="font-medium">{pendingPayments.count ?? 0}</span> pagamento(s)
+              pendente(s) ou em atraso
             </p>
             <p className="text-muted">
-              Enable email reminders in Supabase Auth and schedule{" "}
-              <code className="rounded bg-sidebar px-1 text-xs">/api/cron/reminders</code> with
-              your host.
+              Ative lembretes por e-mail no Supabase Auth e agende{" "}
+              <code className="rounded bg-sidebar px-1 text-xs">/api/cron/reminders</code> no
+              seu provedor de hospedagem.
             </p>
           </div>
         </div>
       </div>
       <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-        <h2 className="text-sm font-semibold text-foreground">Recent activity</h2>
+        <h2 className="text-sm font-semibold text-foreground">Atividade recente</h2>
         <ul className="mt-4 divide-y divide-border">
           {(recentActivity.data ?? []).length === 0 ? (
-            <li className="py-3 text-sm text-muted">No activity yet.</li>
+            <li className="py-3 text-sm text-muted">Nenhuma atividade ainda.</li>
           ) : (
             (recentActivity.data ?? []).map((a) => (
               <li key={a.id} className="flex flex-wrap items-baseline gap-2 py-3">

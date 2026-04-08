@@ -35,7 +35,7 @@ export function AnalyticsCharts({
     <>
       <div className="grid gap-8 lg:grid-cols-2">
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-foreground">Revenue trend</h2>
+          <h2 className="text-sm font-semibold text-foreground">Evolução da receita</h2>
           <div className="mt-4 h-64 min-w-0">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={trendData}>
@@ -48,13 +48,14 @@ export function AnalyticsCharts({
                       style: "currency",
                       currency: "BRL",
                     }).format(Number(v)),
-                    "Revenue",
+                    "Receita",
                   ]}
                 />
                 <Legend />
                 <Line
                   type="monotone"
                   dataKey="revenue"
+                  name="Receita"
                   stroke="#2563eb"
                   strokeWidth={2}
                   dot={{ r: 3 }}
@@ -64,10 +65,10 @@ export function AnalyticsCharts({
           </div>
         </div>
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-foreground">Sessions by status</h2>
+          <h2 className="text-sm font-semibold text-foreground">Aulas por status</h2>
           <div className="mt-4 h-64 min-w-0">
             {statusData.length === 0 ? (
-              <p className="text-sm text-muted">No sessions yet.</p>
+              <p className="text-sm text-muted">Nenhuma aula ainda.</p>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -93,28 +94,28 @@ export function AnalyticsCharts({
       </div>
       <div className="grid gap-8 lg:grid-cols-2">
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-foreground">Common breeds</h2>
+          <h2 className="text-sm font-semibold text-foreground">Raças mais comuns</h2>
           <div className="mt-4 h-64 min-w-0">
             {breedData.length === 0 ? (
-              <p className="text-sm text-muted">Add breeds on dog profiles.</p>
+              <p className="text-sm text-muted">Informe a raça nos perfis dos cães.</p>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={breedData} layout="vertical" margin={{ left: 8 }}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
                   <XAxis type="number" tick={{ fontSize: 11 }} />
                   <YAxis type="category" dataKey="breed" width={100} tick={{ fontSize: 10 }} />
-                  <Tooltip />
-                  <Bar dataKey="count" fill="#22c55e" radius={[0, 4, 4, 0]} />
+                  <Tooltip formatter={(v) => [v, "Quantidade"]} />
+                  <Bar dataKey="count" name="Quantidade" fill="#22c55e" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}
           </div>
         </div>
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-foreground">Trainer performance</h2>
+          <h2 className="text-sm font-semibold text-foreground">Desempenho por adestrador</h2>
           <div className="mt-4 h-64 min-w-0">
             {trainerData.length === 0 ? (
-              <p className="text-sm text-muted">Complete sessions to populate.</p>
+              <p className="text-sm text-muted">Conclua aulas para ver os dados.</p>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={trainerData}>
@@ -127,8 +128,13 @@ export function AnalyticsCharts({
                     height={60}
                   />
                   <YAxis tick={{ fontSize: 11 }} />
-                  <Tooltip />
-                  <Bar dataKey="sessions_completed" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                  <Tooltip formatter={(v) => [v, "Aulas concluídas"]} />
+                  <Bar
+                    dataKey="sessions_completed"
+                    name="Aulas concluídas"
+                    fill="#2563eb"
+                    radius={[4, 4, 0, 0]}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -137,11 +143,11 @@ export function AnalyticsCharts({
       </div>
       <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
         <h2 className="text-sm font-semibold text-foreground">
-          Behavioral themes (from free-text, split by comma)
+          Temas comportamentais (texto livre, separado por vírgula)
         </h2>
         <div className="mt-4 h-64 min-w-0">
           {problemData.length === 0 ? (
-            <p className="text-sm text-muted">Add behavioral notes on dogs.</p>
+            <p className="text-sm text-muted">Adicione observações comportamentais nos cães.</p>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={problemData}>
@@ -154,8 +160,8 @@ export function AnalyticsCharts({
                   height={70}
                 />
                 <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip />
-                <Bar dataKey="count" fill="#94a3b8" radius={[4, 4, 0, 0]} />
+                <Tooltip formatter={(v) => [v, "Ocorrências"]} />
+                <Bar dataKey="count" name="Ocorrências" fill="#94a3b8" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}

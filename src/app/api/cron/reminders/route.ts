@@ -6,7 +6,7 @@ export async function POST(request: Request) {
   if (secret) {
     const auth = request.headers.get("authorization");
     if (auth !== `Bearer ${secret}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
   }
   let admin;
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     admin = createAdminClient();
   } catch {
     return NextResponse.json(
-      { error: "Admin client not configured", sent: 0 },
+      { error: "Cliente admin não configurado", sent: 0 },
       { status: 503 },
     );
   }
@@ -46,8 +46,8 @@ export async function POST(request: Request) {
         user_id: null,
         channel: "email",
         type: "session_reminder_client",
-        title: "Upcoming training session",
-        body: `Reminder: session for ${row.dogs?.name ?? "your dog"} with ${row.clients.name}.`,
+        title: "Aula de adestramento amanhã",
+        body: `Lembrete: aula de ${row.dogs?.name ?? "seu cão"} — ${row.clients.name}.`,
         metadata: { session_id: row.id, to: row.clients.email },
       });
       await admin
@@ -62,8 +62,8 @@ export async function POST(request: Request) {
         user_id: null,
         channel: "email",
         type: "session_reminder_trainer",
-        title: "Session on your calendar",
-        body: `You have a session coming up for ${row.dogs?.name ?? "a dog"}.`,
+        title: "Aula na sua agenda",
+        body: `Você tem uma aula em breve: ${row.dogs?.name ?? "cão"}.`,
         metadata: { session_id: row.id, to: row.profiles.email },
       });
       await admin
@@ -77,6 +77,6 @@ export async function POST(request: Request) {
     ok: true,
     notifications_queued: queued,
     whatsapp_ready:
-      "Store phone on clients and POST to WhatsApp Cloud API from a worker using metadata on notifications.",
+      "Guarde o telefone do cliente e envie via WhatsApp Cloud API a partir do metadata das notificações.",
   });
 }

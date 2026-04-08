@@ -13,21 +13,19 @@ export default function LoginPage({
           href="/"
           className="text-sm font-medium text-primary hover:underline"
         >
-          ← Back
+          ← Voltar
         </Link>
         <h1 className="mt-6 text-2xl font-semibold tracking-tight text-foreground">
-          Sign in
+          Entrar
         </h1>
-        <p className="mt-2 text-sm text-muted">
-          Access your training workspace.
-        </p>
+        <p className="mt-2 text-sm text-muted">Acesse o painel da sua empresa.</p>
         <div className="mt-8 rounded-2xl border border-border bg-card p-6 shadow-sm">
           <LoginForm nextPathPromise={searchParams} />
         </div>
         <p className="mt-6 text-center text-sm text-muted">
-          No account?{" "}
+          Não tem conta?{" "}
           <Link href="/signup" className="font-medium text-primary hover:underline">
-            Create one
+            Criar conta
           </Link>
         </p>
       </div>

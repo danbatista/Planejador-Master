@@ -19,18 +19,18 @@ export default async function ProgressHubPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          Progress tracking
+          Evolução dos cães
         </h1>
         <p className="mt-1 text-sm text-muted">
-          Open a dog to add notes, timeline entries, and export a client PDF.
+          Abra um cão para anotar, ver a linha do tempo e gerar PDF para o tutor.
         </p>
       </div>
       <ul className="grid gap-3 sm:grid-cols-2">
         {dogs.length === 0 ? (
           <li className="rounded-xl border border-border bg-card p-6 text-sm text-muted">
             {ctx.bypass
-              ? "Preview mode: add dogs when using Supabase."
-              : "Add dogs from a client profile first."}
+              ? "Modo prévia: cadastre cães com o Supabase ativo."
+              : "Cadastre cães a partir do perfil do cliente."}
           </li>
         ) : (
           dogs.map((d) => (

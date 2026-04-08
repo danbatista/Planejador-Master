@@ -17,17 +17,17 @@ import {
 } from "lucide-react";
 
 const nav = [
-  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
-  { href: "/dashboard/clients", label: "Clients", icon: Users },
-  { href: "/dashboard/calendar", label: "Calendar", icon: Calendar },
-  { href: "/dashboard/services", label: "Services", icon: Package },
-  { href: "/dashboard/finance", label: "Finance", icon: Wallet },
-  { href: "/dashboard/progress", label: "Progress", icon: PawPrint },
-  { href: "/dashboard/team", label: "Team", icon: Dog },
-  { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
-  { href: "/dashboard/reports", label: "Reports", icon: TrendingUp },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
+  { href: "/dashboard", label: "Visão geral", icon: LayoutDashboard },
+  { href: "/dashboard/clients", label: "Clientes", icon: Users },
+  { href: "/dashboard/calendar", label: "Agenda", icon: Calendar },
+  { href: "/dashboard/services", label: "Serviços", icon: Package },
+  { href: "/dashboard/finance", label: "Financeiro", icon: Wallet },
+  { href: "/dashboard/progress", label: "Evolução", icon: PawPrint },
+  { href: "/dashboard/team", label: "Equipe", icon: Dog },
+  { href: "/dashboard/analytics", label: "Análises", icon: BarChart3 },
+  { href: "/dashboard/notifications", label: "Notificações", icon: Bell },
+  { href: "/dashboard/reports", label: "Relatórios", icon: TrendingUp },
+  { href: "/dashboard/settings", label: "Configurações", icon: Settings },
 ];
 
 export function AppShell({
@@ -59,7 +59,7 @@ export function AppShell({
           ))}
         </nav>
         <div className="border-t border-border p-3 text-xs text-muted">
-          Signed in as{" "}
+          Conectado como{" "}
           <span className="font-medium text-foreground">
             {profile.full_name || profile.email}
           </span>
@@ -80,7 +80,7 @@ export function AppShell({
               className="hidden items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-sidebar sm:inline-flex"
             >
               <Receipt className="h-4 w-4" />
-              Finance
+              Financeiro
             </Link>
             <ThemeToggle />
           </div>

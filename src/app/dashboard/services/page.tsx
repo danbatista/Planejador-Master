@@ -3,12 +3,12 @@ import { NewPackageForm } from "./new-package-form";
 import { NewServiceForm } from "./new-service-form";
 
 const KIND_LABELS: Record<string, string> = {
-  private_lesson: "Private lesson",
-  group_lesson: "Group lesson",
-  boarding: "Boarding",
-  behavior_correction: "Behavior correction",
-  puppy_training: "Puppy training",
-  custom: "Custom",
+  private_lesson: "Aula particular",
+  group_lesson: "Aula em grupo",
+  boarding: "Hospedagem",
+  behavior_correction: "Correção comportamental",
+  puppy_training: "Filhote",
+  custom: "Personalizado",
 };
 
 export default async function ServicesPage() {
@@ -44,17 +44,19 @@ export default async function ServicesPage() {
     <div className="space-y-10">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          Services & packages
+          Serviços e pacotes
         </h1>
-        <p className="mt-1 text-sm text-muted">Catalog for lessons, boarding, and bundles.</p>
+        <p className="mt-1 text-sm text-muted">
+          Catálogo de aulas, hospedagem e combos.
+        </p>
       </div>
       <div className="grid gap-8 lg:grid-cols-2">
         <div>
-          <h2 className="text-sm font-semibold text-foreground">Services</h2>
+          <h2 className="text-sm font-semibold text-foreground">Serviços</h2>
           <div className="mt-3 space-y-2">
             {services.length === 0 ? (
               <p className="text-sm text-muted">
-                {ctx.bypass ? "Preview mode: no services." : "No services yet."}
+                {ctx.bypass ? "Modo prévia: sem serviços." : "Nenhum serviço ainda."}
               </p>
             ) : (
               services.map((s) => (
@@ -79,7 +81,7 @@ export default async function ServicesPage() {
                           : "text-xs text-muted"
                       }
                     >
-                      {s.active ? "Active" : "Inactive"}
+                      {s.active ? "Ativo" : "Inativo"}
                     </span>
                   </div>
                 </div>
@@ -91,11 +93,11 @@ export default async function ServicesPage() {
           </div>
         </div>
         <div>
-          <h2 className="text-sm font-semibold text-foreground">Packages</h2>
+          <h2 className="text-sm font-semibold text-foreground">Pacotes</h2>
           <div className="mt-3 space-y-2">
             {packages.length === 0 ? (
               <p className="text-sm text-muted">
-                {ctx.bypass ? "Preview mode: no packages." : "No packages yet."}
+                {ctx.bypass ? "Modo prévia: sem pacotes." : "Nenhum pacote ainda."}
               </p>
             ) : (
               packages.map((p) => (
@@ -105,8 +107,8 @@ export default async function ServicesPage() {
                 >
                   <p className="font-medium text-foreground">{p.name}</p>
                   <p className="text-xs text-muted">
-                    {p.sessions_included} sessions
-                    {p.validity_days ? ` · ${p.validity_days} days validity` : ""}
+                    {p.sessions_included} aula(s)
+                    {p.validity_days ? ` · válido por ${p.validity_days} dias` : ""}
                   </p>
                   {p.description ? (
                     <p className="mt-2 text-sm text-muted">{p.description}</p>

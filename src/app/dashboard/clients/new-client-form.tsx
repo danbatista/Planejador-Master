@@ -20,7 +20,9 @@ export function NewClientForm() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (preview) {
-      setError("Preview mode: connect Supabase and set NEXT_PUBLIC_AUTH_BYPASS=0 to save.");
+      setError(
+        "Modo prévia: configure o Supabase e defina NEXT_PUBLIC_AUTH_BYPASS=0 para salvar.",
+      );
       return;
     }
     setError(null);
@@ -30,7 +32,7 @@ export function NewClientForm() {
     } = await supabase.auth.getUser();
     if (!user) {
       setLoading(false);
-      setError("Not signed in");
+      setError("Sessão expirada. Entre novamente.");
       return;
     }
     const { data: profile } = await supabase
@@ -40,7 +42,7 @@ export function NewClientForm() {
       .single();
     if (!profile?.organization_id) {
       setLoading(false);
-      setError("No organization");
+      setError("Empresa não encontrada");
       return;
     }
     const { data, error: err } = await supabase
@@ -78,36 +80,36 @@ export function NewClientForm() {
 
   return (
     <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-      <h2 className="text-sm font-semibold text-foreground">New client</h2>
+      <h2 className="text-sm font-semibold text-foreground">Novo cliente</h2>
       <form onSubmit={onSubmit} className="mt-4 space-y-3">
         <input
           required
-          placeholder="Name"
+          placeholder="Nome"
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
         />
         <input
           type="email"
-          placeholder="Email"
+          placeholder="E-mail"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
         />
         <input
-          placeholder="Phone"
+          placeholder="Telefone"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
         />
         <input
-          placeholder="Address"
+          placeholder="Endereço"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
         />
         <textarea
-          placeholder="Notes"
+          placeholder="Observações"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={3}
@@ -121,7 +123,7 @@ export function NewClientForm() {
           disabled={loading || preview}
           className="w-full rounded-lg bg-primary py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60"
         >
-          {preview ? "Preview — disabled" : loading ? "Saving…" : "Add client"}
+          {preview ? "Prévia — desativado" : loading ? "Salvando…" : "Adicionar cliente"}
         </button>
       </form>
     </div>

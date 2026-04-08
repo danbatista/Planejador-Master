@@ -33,8 +33,8 @@ export default async function ClientsPage({
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Clients</h1>
-          <p className="mt-1 text-sm text-muted">CRM for owners and their dogs.</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Clientes</h1>
+          <p className="mt-1 text-sm text-muted">Cadastro de tutores e seus cães.</p>
         </div>
         <ClientSearch initial={term ?? ""} />
       </div>
@@ -44,8 +44,8 @@ export default async function ClientsPage({
             <table className="w-full text-left text-sm">
               <thead className="border-b border-border bg-sidebar text-xs font-medium uppercase text-muted">
                 <tr>
-                  <th className="px-4 py-3">Name</th>
-                  <th className="hidden px-4 py-3 sm:table-cell">Contact</th>
+                  <th className="px-4 py-3">Nome</th>
+                  <th className="hidden px-4 py-3 sm:table-cell">Contato</th>
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
@@ -54,8 +54,8 @@ export default async function ClientsPage({
                   <tr>
                     <td colSpan={3} className="px-4 py-8 text-center text-muted">
                       {ctx.bypass
-                        ? "Preview mode: no data. Forms are disabled."
-                        : "No clients yet. Add your first on the right."}
+                        ? "Modo prévia: sem dados. Formulários desativados."
+                        : "Nenhum cliente. Adicione o primeiro ao lado."}
                     </td>
                   </tr>
                 ) : (
@@ -77,7 +77,7 @@ export default async function ClientsPage({
                           href={`/dashboard/clients/${c.id}`}
                           className="text-xs font-medium text-primary hover:underline"
                         >
-                          View
+                          Abrir
                         </Link>
                       </td>
                     </tr>

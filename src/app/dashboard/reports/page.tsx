@@ -36,16 +36,16 @@ export default async function ReportsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Reports</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Relatórios</h1>
         <p className="mt-1 text-sm text-muted">
-          Client-facing PDFs bundle profile, progress, goals, and notes.
+          PDFs para o tutor com perfil, evolução, objetivos e anotações.
         </p>
       </div>
       <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
-        <h2 className="text-sm font-semibold text-foreground">Export by dog</h2>
+        <h2 className="text-sm font-semibold text-foreground">Exportar por cão</h2>
         {dogs.length === 0 ? (
           <p className="mt-4 text-sm text-muted">
-            {ctx.bypass ? "Preview mode: no dogs." : "No dogs yet."}
+            {ctx.bypass ? "Modo prévia: sem cães." : "Nenhum cão cadastrado."}
           </p>
         ) : (
           <ul className="mt-4 space-y-2">
@@ -59,7 +59,7 @@ export default async function ReportsPage() {
                   href={`/api/reports/dog/${d.id}`}
                   className="text-xs font-semibold text-primary hover:underline"
                 >
-                  Download PDF
+                  Baixar PDF
                 </Link>
               </li>
             ))}
@@ -67,15 +67,15 @@ export default async function ReportsPage() {
         )}
       </section>
       <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
-        <h2 className="text-sm font-semibold text-foreground">Recent exports</h2>
+        <h2 className="text-sm font-semibold text-foreground">Exportações recentes</h2>
         <ul className="mt-3 space-y-2 text-sm text-muted">
           {generated.length === 0 ? (
-            <li>{ctx.bypass ? "Preview mode." : "None yet."}</li>
+            <li>{ctx.bypass ? "Modo prévia." : "Nenhuma ainda."}</li>
           ) : (
             generated.map((g) => (
               <li key={g.id}>
-                {g.dogs?.name ?? "Dog"} · {g.report_type} ·{" "}
-                {new Date(g.created_at).toLocaleString()}
+                {g.dogs?.name ?? "Cão"} · {g.report_type} ·{" "}
+                {new Date(g.created_at).toLocaleString("pt-BR")}
               </li>
             ))
           )}

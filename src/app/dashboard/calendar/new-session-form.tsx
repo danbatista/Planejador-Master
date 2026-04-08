@@ -54,21 +54,23 @@ export function NewSessionForm({
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (preview) {
-      setError("Preview mode: connect Supabase and set NEXT_PUBLIC_AUTH_BYPASS=0 to save.");
+      setError(
+        "Modo prévia: configure o Supabase e defina NEXT_PUBLIC_AUTH_BYPASS=0 para salvar.",
+      );
       return;
     }
     setError(null);
     if (!dogId || !clientId) {
-      setError("Select a dog");
+      setError("Selecione um cão");
       return;
     }
     if (!startLocal) {
-      setError("Pick date and time");
+      setError("Escolha data e horário");
       return;
     }
     const start = new Date(startLocal);
     if (Number.isNaN(start.getTime())) {
-      setError("Invalid date");
+      setError("Data inválida");
       return;
     }
     const svc = services.find((s) => s.id === serviceId);
@@ -78,7 +80,7 @@ export function NewSessionForm({
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) {
-      setError("Not signed in");
+      setError("Sessão expirada. Entre novamente.");
       return;
     }
     const { data: profile } = await supabase
@@ -87,7 +89,7 @@ export function NewSessionForm({
       .eq("id", user.id)
       .single();
     if (!profile?.organization_id) {
-      setError("No organization");
+      setError("Empresa não encontrada");
       return;
     }
     let finalTrainer = trainerId;
@@ -109,7 +111,7 @@ export function NewSessionForm({
     setLoading(false);
     if (err) {
       if (err.message.includes("overlap") || err.code === "23P01") {
-        setError("Schedule conflict: trainer or dog already booked.");
+        setError("Conflito de agenda: adestrador ou cão já ocupado neste horário.");
       } else {
         setError(err.message);
       }
@@ -127,24 +129,24 @@ export function NewSessionForm({
 
   return (
     <div className="h-fit rounded-xl border border-border bg-card p-5 shadow-sm">
-      <h2 className="text-sm font-semibold text-foreground">New session</h2>
+      <h2 className="text-sm font-semibold text-foreground">Nova aula</h2>
       <p className="mt-1 text-xs text-muted">
-        Double booking is blocked at the database layer.
+        O banco impede sobreposição para o mesmo adestrador ou o mesmo cão.
       </p>
       <form onSubmit={onSubmit} className="mt-4 space-y-3">
         <div>
-          <label className="text-xs font-medium text-muted">Dog</label>
+          <label className="text-xs font-medium text-muted">Cão</label>
           <select
             value={dogId}
             onChange={(e) => setDogId(e.target.value)}
             className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
           >
             {dogs.length === 0 ? (
-              <option value="">Add a dog first</option>
+              <option value="">Cadastre um cão antes</option>
             ) : (
               dogs.map((d) => (
                 <option key={d.id} value={d.id}>
-                  {d.name} ({d.clients?.name ?? "Client"})
+                  {d.name} ({d.clients?.name ?? "Cliente"})
                 </option>
               ))
             )}
@@ -152,7 +154,7 @@ export function NewSessionForm({
         </div>
         {canAssignAnyTrainer(role) ? (
           <div>
-            <label className="text-xs font-medium text-muted">Instructor</label>
+            <label className="text-xs font-medium text-muted">Adestrador</label>
             <select
               value={trainerId}
               onChange={(e) => setTrainerId(e.target.value)}
@@ -167,14 +169,14 @@ export function NewSessionForm({
           </div>
         ) : null}
         <div>
-          <label className="text-xs font-medium text-muted">Service</label>
+          <label className="text-xs font-medium text-muted">Serviço</label>
           <select
             value={serviceId}
             onChange={(e) => setServiceId(e.target.value)}
             className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
           >
             {services.length === 0 ? (
-              <option value="">Create services first</option>
+              <option value="">Cadastre serviços antes</option>
             ) : (
               services.map((s) => (
                 <option key={s.id} value={s.id}>
@@ -185,7 +187,7 @@ export function NewSessionForm({
           </select>
         </div>
         <div>
-          <label className="text-xs font-medium text-muted">Starts</label>
+          <label className="text-xs font-medium text-muted">Início</label>
           <input
             type="datetime-local"
             value={startLocal}
@@ -194,7 +196,7 @@ export function NewSessionForm({
           />
         </div>
         <input
-          placeholder="Title (optional)"
+          placeholder="Título (opcional)"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
@@ -207,7 +209,7 @@ export function NewSessionForm({
           disabled={loading || preview || dogs.length === 0}
           className="w-full rounded-lg bg-primary py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60"
         >
-          {preview ? "Preview — disabled" : loading ? "Scheduling…" : "Schedule"}
+          {preview ? "Prévia — desativado" : loading ? "Agendando…" : "Agendar"}
         </button>
       </form>
     </div>

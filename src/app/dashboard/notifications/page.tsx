@@ -23,22 +23,28 @@ export default async function NotificationsPage() {
     items = (data ?? []) as typeof items;
   }
 
+  const channelPt: Record<string, string> = {
+    email: "E-mail",
+    whatsapp: "WhatsApp",
+    in_app: "No app",
+  };
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          Notifications
+          Notificações
         </h1>
         <p className="mt-1 text-sm text-muted">
-          In-app queue; email and WhatsApp hooks attach via workers reading this table.
+          Fila interna; e-mail e WhatsApp podem consumir esta tabela em um worker.
         </p>
       </div>
       <ul className="space-y-2">
         {items.length === 0 ? (
           <li className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted">
             {ctx.bypass
-              ? "Preview mode: no notifications."
-              : "No notifications yet. Cron reminders will enqueue rows here."}
+              ? "Modo prévia: sem notificações."
+              : "Nenhuma notificação. O cron de lembretes enfileira aqui."}
           </li>
         ) : (
           items.map((n) => (
@@ -51,8 +57,8 @@ export default async function NotificationsPage() {
                 <span className="text-xs text-muted">{formatDateTime(n.created_at)}</span>
               </div>
               {n.body ? <p className="mt-1 text-sm text-muted">{n.body}</p> : null}
-              <p className="mt-2 text-xs capitalize text-muted">
-                {n.channel} · {n.type}
+              <p className="mt-2 text-xs text-muted">
+                {channelPt[n.channel] ?? n.channel} · {n.type}
               </p>
             </li>
           ))

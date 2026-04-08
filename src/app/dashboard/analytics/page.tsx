@@ -1,4 +1,4 @@
-import { formatMoney } from "@/lib/format";
+import { formatMoney, monthLabelPt, sessionStatusPt } from "@/lib/format";
 import { getOrgContext } from "@/lib/org-context";
 import { AnalyticsCharts } from "./analytics-charts";
 
@@ -12,26 +12,26 @@ export default async function AnalyticsPage() {
       dt.setMonth(dt.getMonth() - i);
       monthKeys.push(`${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}`);
     }
-    const trendData = monthKeys.map((k) => ({ month: k.slice(5), revenue: 0 }));
+    const trendData = monthKeys.map((k) => ({ month: monthLabelPt(k), revenue: 0 }));
     return (
       <div className="space-y-10">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Analytics</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Análises</h1>
           <p className="mt-1 text-sm text-muted">
-            Breeds, behavioral themes, session outcomes, revenue trend, trainer load.
+            Raças, comportamentos, resultado das aulas, receita e carga por adestrador.
           </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-            <p className="text-xs text-muted">Lifetime paid revenue</p>
+            <p className="text-xs text-muted">Receita total recebida</p>
             <p className="mt-1 text-xl font-semibold tabular-nums">{formatMoney(0)}</p>
           </div>
           <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-            <p className="text-xs text-muted">Session completion rate</p>
+            <p className="text-xs text-muted">Taxa de conclusão de aulas</p>
             <p className="mt-1 text-xl font-semibold tabular-nums">0%</p>
           </div>
           <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-            <p className="text-xs text-muted">Dogs in CRM</p>
+            <p className="text-xs text-muted">Cães no cadastro</p>
             <p className="mt-1 text-xl font-semibold tabular-nums">0</p>
           </div>
         </div>
@@ -63,7 +63,7 @@ export default async function AnalyticsPage() {
 
   const breedCounts = new Map<string, number>();
   for (const d of dogs ?? []) {
-    const b = (d.breed || "Unknown").trim() || "Unknown";
+    const b = (d.breed || "Não informada").trim() || "Não informada";
     breedCounts.set(b, (breedCounts.get(b) ?? 0) + 1);
   }
   const breedData = [...breedCounts.entries()]
@@ -92,7 +92,7 @@ export default async function AnalyticsPage() {
     statusCounts[s.status] = (statusCounts[s.status] ?? 0) + 1;
   }
   const statusData = Object.entries(statusCounts).map(([status, count]) => ({
-    status: status.replace("_", " "),
+    status: sessionStatusPt(status),
     count,
   }));
 
@@ -102,7 +102,7 @@ export default async function AnalyticsPage() {
     const row = s as typeof s & {
       profiles: { full_name: string | null } | null;
     };
-    const name = row.profiles?.full_name || "Trainer";
+    const name = row.profiles?.full_name || "Adestrador";
     trainerCompleted.set(name, (trainerCompleted.get(name) ?? 0) + 1);
   }
   const trainerData = [...trainerCompleted.entries()]
@@ -127,7 +127,7 @@ export default async function AnalyticsPage() {
     }
   }
   const trendData = monthKeys.map((k) => ({
-    month: k.slice(5),
+    month: monthLabelPt(k),
     revenue: (revenueByMonth.get(k) ?? 0) / 100,
   }));
 
@@ -144,22 +144,22 @@ export default async function AnalyticsPage() {
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Analytics</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Análises</h1>
         <p className="mt-1 text-sm text-muted">
-          Breeds, behavioral themes, session outcomes, revenue trend, trainer load.
+          Raças, comportamentos, resultado das aulas, receita e carga por adestrador.
         </p>
       </div>
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-          <p className="text-xs text-muted">Lifetime paid revenue</p>
+          <p className="text-xs text-muted">Receita total recebida</p>
           <p className="mt-1 text-xl font-semibold tabular-nums">{formatMoney(totalPaid)}</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-          <p className="text-xs text-muted">Session completion rate</p>
+          <p className="text-xs text-muted">Taxa de conclusão de aulas</p>
           <p className="mt-1 text-xl font-semibold tabular-nums">{completionRate}%</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-          <p className="text-xs text-muted">Dogs in CRM</p>
+          <p className="text-xs text-muted">Cães no cadastro</p>
           <p className="mt-1 text-xl font-semibold tabular-nums">{dogs?.length ?? 0}</p>
         </div>
       </div>

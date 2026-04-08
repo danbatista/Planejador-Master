@@ -13,7 +13,7 @@ function bypassProfile(): Profile {
     id: "00000000-0000-4000-8000-000000000002",
     organization_id: BYPASS_ORG_ID,
     email: "preview@local.dev",
-    full_name: "Preview Trainer",
+    full_name: "Adestrador (prévia)",
     phone: null,
     avatar_url: null,
     role: "admin",

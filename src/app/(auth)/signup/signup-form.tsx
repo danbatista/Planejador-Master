@@ -46,7 +46,7 @@ export function SignupForm() {
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-foreground">
-            Full name
+            Nome completo
           </label>
           <input
             id="name"
@@ -60,7 +60,7 @@ export function SignupForm() {
         </div>
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-foreground">
-            Email
+            E-mail
           </label>
           <input
             id="email"
@@ -74,7 +74,7 @@ export function SignupForm() {
         </div>
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-foreground">
-            Password
+            Senha
           </label>
           <input
             id="password"
@@ -95,7 +95,7 @@ export function SignupForm() {
           disabled={loading}
           className="w-full rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60"
         >
-          {loading ? "Creating…" : "Create account"}
+          {loading ? "Criando…" : "Criar conta"}
         </button>
       </form>
       <div className="relative">
@@ -103,7 +103,7 @@ export function SignupForm() {
           <span className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-card px-2 text-muted">Or</span>
+          <span className="bg-card px-2 text-muted">Ou</span>
         </div>
       </div>
       <button
@@ -111,7 +111,7 @@ export function SignupForm() {
         onClick={signUpWithGoogle}
         className="w-full rounded-lg border border-border py-2.5 text-sm font-semibold text-foreground hover:bg-sidebar"
       >
-        Continue with Google
+        Continuar com Google
       </button>
     </div>
   );

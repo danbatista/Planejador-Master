@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TrainPaw — Dog Training Management",
+  title: "TrainPaw — Gestão para adestradores",
   description:
-    "Multi-tenant SaaS for dog trainers: clients, scheduling, finances, and progress in one place.",
+    "Plataforma para adestradores e escolas de cães: clientes, agenda, financeiro e evolução em um só lugar.",
 };
 
 export default function RootLayout({
@@ -25,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="pt-BR" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-full antialiased`}
       >
