@@ -65,7 +65,7 @@ export function DogReportDocument({
           ))
         )}
         <Text style={{ marginTop: 16, fontSize: 9, color: "#64748b" }}>
-          Gerado pelo TrainPaw — recomendações: constância, sessões objetivas e reforço
+          Gerado pelo PataPro — recomendações: constância, sessões objetivas e reforço
           positivo. Sugestões com IA podem ser integradas por API no futuro.
         </Text>
       </Page>

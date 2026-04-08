@@ -44,7 +44,7 @@ export function AppShell({
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <PawPrint className="h-4 w-4" />
           </span>
-          <span className="font-semibold tracking-tight">TrainPaw</span>
+          <span className="font-semibold tracking-tight">PataPro</span>
         </div>
         <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto p-3">
           {nav.map((item) => (
@@ -71,7 +71,7 @@ export function AppShell({
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <PawPrint className="h-4 w-4" />
             </span>
-            <span className="font-semibold">TrainPaw</span>
+            <span className="font-semibold">PataPro</span>
           </div>
           <div className="hidden flex-1 lg:block" />
           <div className="flex items-center gap-2">

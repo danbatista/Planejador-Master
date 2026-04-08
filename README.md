@@ -1,4 +1,4 @@
-# TrainPaw
+# PataPro
 
 Plataforma SaaS multiempresa para adestradores: clientes, cães, agenda, serviços, financeiro, equipe, evolução e relatórios.
 

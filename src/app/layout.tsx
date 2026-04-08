@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TrainPaw — Gestão para adestradores",
+  title: "PataPro — Gestão para adestradores",
   description:
     "Plataforma para adestradores e escolas de cães: clientes, agenda, financeiro e evolução em um só lugar.",
 };
